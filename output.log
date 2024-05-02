@@ -1,0 +1,66 @@
+I am running as an admin!
+Current IP Address: 192.168.1.237
+Updated IP Address: 192.168.45.30
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.236
+IP address 192.168.1.236 is already in use on the network.
+Updated IP Address: 192.168.1.236
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.236
+Updated IP Address: 192.168.45.30
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.30
+Updated IP Address: 192.168.45.30
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.37
+IP address 192.168.1.37 is already in use on the network.
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.37
+Failed to change IP address: 
+
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.3
+Failed to change IP address: 
+
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.30
+Failed to change IP address: 
+
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.37
+IP address 192.168.1.37 is already in use on the network.
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.37
+CompletedProcess(args='netsh interface ip set address name="Ethernet" static 192.168.1.35 255.255.255.0 192.168.1.1', returncode=0, stdout='\n', stderr='')
+Failed to change IP address: 
+
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.35
+CompletedProcess(args='netsh interface ip set address name="Ethernet" static 192.168.1.350 255.255.255.0 192.168.1.1', returncode=1, stdout='\nInvalid address parameter (192.168.1.350). It should be a valid IPv4 address.\n\n', stderr='')
+Failed to change IP address: 
+Invalid address parameter (192.168.1.350). It should be a valid IPv4 address.
+
+
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.35
+CompletedProcess(args='netsh interface ip set address name="Ethernet" static 192.168.1.30 255.255.255.0 192.168.1.1', returncode=0, stdout='\n', stderr='')
+IP address changed successfully to 192.168.1.30.
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.30
+IP address 192.168.1.30 is already in use on the network.
+Not running as admin. Trying to elevate privileges.
+I am running as an admin!
+Current IP Address: 192.168.1.30
+IP address changed successfully to 192.168.1.37.
