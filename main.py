@@ -63,11 +63,10 @@ class FolderCleanerApp:
 
         path_entry.insert(0, default_path)
 
-
-
     def initialize_ip_manager_row(self, master, row):
 
-        self.current_ip = self.get_current_ip().split('.')  # Assuming it returns something like "192.168.1.100"
+        self.current_ip = self.get_current_ip().split('.')
+
         ip_frame = tk.Frame(master)
         tk.Label(master, text="IP Address:").grid(row=row, column=1, padx=10, pady=10, sticky='w')
         ip_frame.grid(row=row, column=1, padx=10, pady=10, sticky='e')
@@ -83,14 +82,14 @@ class FolderCleanerApp:
         ]
 
         # Entry fields for the IP address parts
-        for i, entry in enumerate(ip_parts):
-            entry.insert(0, self.current_ip[i])  # Prefill with current IP octets
-            entry.pack(side=tk.LEFT)
+        for i, octlet in enumerate(ip_parts):
+            octlet.insert(0, self.current_ip[i])  # Prefill with current IP octets
+            octlet.pack(side=tk.LEFT)
             if i < 3:
                 tk.Label(ip_frame, text=".").pack(side=tk.LEFT)
-            entry.bind('<FocusOut>', lambda e, entry=entry, index=i: self.ensure_valid_entry(e, entry, index))
-            entry.bind('<KeyPress>', lambda e, index=i: self.handle_key_press(e, ip_parts, index))
-            entry.bind('<Button-1>', lambda e, entry=entry: self.clear_entry(entry))
+            octlet.bind('<FocusOut>', lambda e, entry=octlet, index=i: self.ensure_valid_entry(e, entry, index))
+            octlet.bind('<KeyPress>', lambda e, index=i: self.handle_key_press(e, ip_parts, index))
+            octlet.bind('<Button-1>', lambda e, entry=octlet: self.clear_entry(entry))
 
         # Layout
         self.set_button = tk.Button(master, text="Set", command=lambda: self.set_ip_address(ip_parts))
