@@ -1,3 +1,4 @@
+
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import os
@@ -6,8 +7,6 @@ import tempfile
 import subprocess
 import sys
 
-'ViperConfigData'
-
 
 class FolderCleanerApp:
     def __init__(self, master):
@@ -15,31 +14,11 @@ class FolderCleanerApp:
         master.title("Folder Cleaner")
 
         # Initialize multiple rows of widgets
-        self.initialize_row(master, "C:/Viper", 0)
-        self.initialize_row(master, "C:/ViperConfigData", 1)
-
-        # Initialize file creation row
+        self.initialize_dir_destruction_row(master, "C:/Viper", 0)
+        self.initialize_dir_destruction_row(master, "C:/ViperConfigData", 1)
         self.initialize_file_creation_row(master, ['.py', '.cs', '.md', '.txt'], 2)
+        self.initialize_ip_manager_row(master, 3)
 
-    def initialize_row(self, master, default_path, row):
-        path_entry = tk.Entry(master, width=50)
-
-        browse_button = tk.Button(
-            master,
-            text="Browse",
-            command=lambda: FolderCleanerApp.browse_folder(path_entry)
-        )
-        delete_button = tk.Button(
-            master,
-            text="Delete Contents",
-            command=lambda: FolderCleanerApp.delete_contents(path_entry)
-        )
-
-        path_entry.grid(row=row, column=1, padx=10, pady=10, sticky=tk.EW)
-        browse_button.grid(row=row, column=2, padx=10, sticky=tk.EW)
-        delete_button.grid(row=row, column=3, padx=10, sticky=tk.EW)
-
-        path_entry.insert(0, default_path)
 
     def initialize_file_creation_row(self, master, extensions, row):
         # Dropdown for file extensions
@@ -62,6 +41,137 @@ class FolderCleanerApp:
         create_open_button.grid(row=row, column=2, columnspan=2, padx=10, pady=10, sticky=tk.EW)
 
         extension_picker.set(extensions[0])  # default value
+
+    @staticmethod
+    def initialize_dir_destruction_row(master, default_path, row):
+        path_entry = tk.Entry(master, width=50)
+
+        browse_button = tk.Button(
+            master,
+            text="Browse",
+            command=lambda: FolderCleanerApp.browse_folder(path_entry)
+        )
+        delete_button = tk.Button(
+            master,
+            text="Delete Contents",
+            command=lambda: FolderCleanerApp.delete_contents(path_entry)
+        )
+
+        path_entry.grid(row=row, column=1, padx=10, pady=10, sticky=tk.EW)
+        browse_button.grid(row=row, column=2, padx=10, sticky=tk.EW)
+        delete_button.grid(row=row, column=3, padx=10, sticky=tk.EW)
+
+        path_entry.insert(0, default_path)
+
+
+
+    def initialize_ip_manager_row(self, master, row):
+
+        self.current_ip = self.get_current_ip().split('.')  # Assuming it returns something like "192.168.1.100"
+        ip_frame = tk.Frame(master)
+        tk.Label(master, text="IP Address:").grid(row=row, column=1, padx=10, pady=10, sticky='w')
+        ip_frame.grid(row=row, column=1, padx=10, pady=10, sticky='e')
+        ip_parts = [
+            tk.Entry(
+                ip_frame,
+                width=3,
+                justify='center',
+                validate="key",
+                validatecommand=(master.register(self.validate_ip_part), '%P')
+            )
+            for _ in range(4)
+        ]
+
+        # Entry fields for the IP address parts
+        for i, entry in enumerate(ip_parts):
+            entry.insert(0, self.current_ip[i])  # Prefill with current IP octets
+            entry.pack(side=tk.LEFT)
+            if i < 3:
+                tk.Label(ip_frame, text=".").pack(side=tk.LEFT)
+            entry.bind('<FocusOut>', lambda e, entry=entry, index=i: self.ensure_valid_entry(e, entry, index))
+            entry.bind('<KeyPress>', lambda e, index=i: self.handle_key_press(e, ip_parts, index))
+            entry.bind('<Button-1>', lambda e, entry=entry: self.clear_entry(entry))
+
+        # Layout
+        self.set_button = tk.Button(master, text="Set", command=lambda: self.set_ip_address(ip_parts))
+        manage_button = tk.Button(master, text="Manage", command=self.manage_ip_settings)
+
+        self.set_button.grid(row=row, column=2, padx=10, pady=10, sticky='EW')  # to set focus, change later if care
+        manage_button.grid(row=row, column=3, padx=10, pady=10, sticky='EW')
+
+    def ensure_valid_entry(self, event, entry, index):
+        """ Ensure that each entry field has a valid IP address segment or set it to the respective current IP part. """
+        if not entry.get() or not self.validate_ip_part(entry.get()):
+            entry.delete(0, tk.END)
+            # Insert the current IP octet if valid, else default to '1'
+            entry.insert(0, self.current_ip[index] if self.current_ip[index].isdigit() and self.validate_ip_part(
+                self.current_ip[index]) else '1')
+
+    def clear_entry(self, entry):
+        """ Clear the entry field when clicked. """
+        entry.delete(0, tk.END)
+
+    def get_current_ip(self):
+        # Mock-up function; replace this with your actual method to get the current IP
+        return '192.168.1.100'
+
+    def validate_ip_part(self, P):
+        """ Validate the entry for IP parts. Allow only digits, limit to 255, and exclude 0 and 255. """
+        if P == "":
+            return True  # Allow clearing the entry
+        if P.isdigit():
+            num = int(P)
+            if 0 < num < 255:  # Excluding 0 and 255 from being valid inputs
+                return True
+        return False
+
+    def handle_key_press(self, event, ip_parts, index):
+        """Handle the key press event to automatically advance under specific conditions."""
+        current_entry_content = ip_parts[index].get()
+
+        # Automatically advance if the user inputs three digits and it's valid
+        if len(current_entry_content) == 2 and event.char.isdigit():
+            potential_new_content = current_entry_content + event.char
+            if self.validate_ip_part(potential_new_content):
+                ip_parts[index].delete(0, tk.END)  # Clear the current input
+                ip_parts[index].insert(0, potential_new_content)  # Insert the new valid input
+                # Advance focus based on the index
+                if index < len(ip_parts) - 1:
+                    ip_parts[index + 1].focus()
+                else:
+                    self.set_button.focus()  # Directly set focus to the set_button
+                return "break"  # Prevent further input in the current entry box
+
+        # Handle period to advance without inserting it, only if the current entry is valid and not empty
+        elif event.char == '.':
+            if current_entry_content and self.validate_ip_part(current_entry_content):
+                if index < len(ip_parts) - 1:
+                    ip_parts[index + 1].focus()
+                else:
+                    self.set_button.focus()  # Directly set focus to the set_button
+                return "break"  # Prevent the period from being inserted
+
+    def set_ip_address(self, ip_parts):
+        # Validate and possibly refill each part before setting the IP address
+        self.validate_and_refill_parts(ip_parts)
+        ip_address = '.'.join(part.get() for part in ip_parts)
+        print("Setting IP Address:", ip_address)  # Placeholder for actual set IP function
+
+    def validate_and_refill_parts(self, ip_parts):
+        """ Ensure all parts are valid before setting the IP, refill if necessary. """
+        for i, part in enumerate(ip_parts):
+            if not part.get() or not self.validate_ip_part(part.get()):
+                # Refill the entry with the current IP octet or default to '1'
+                part.delete(0, tk.END)
+                part.insert(0, self.current_ip[i] if self.current_ip[i].isdigit() and self.validate_ip_part(
+                    self.current_ip[i]) else '1')
+
+    def manage_ip_settings(self):
+        # Open a new window to manage IP settings
+        manage_window = tk.Toplevel(self.master)
+        manage_window.title("IP Settings")
+        tk.Label(manage_window, text="IP Settings Management").pack()
+
 
     @staticmethod
     def browse_folder(path_entry):
@@ -87,16 +197,18 @@ class FolderCleanerApp:
         ext = file_extension.get()
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=ext)
         temp_file.close()
-        if os.name == 'nt':  # For Windows
+        if os.name == 'nt':                         # For Windows
             os.startfile(temp_file.name)
-        else:  # For MacOS or Linux
+        else:                                       # For Mac or Linux
             opener = "open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, temp_file.name])
+
 
 def main():
     root = tk.Tk()
     app = FolderCleanerApp(root)
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
