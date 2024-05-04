@@ -178,3 +178,23 @@ thesde all need to be more clear abouyt their intent and organized
 these commands should temporarly clear the octet whenever they enter it this way fresh value can be entered
 quickly and effeciently But if no changes are made it should repooulate with the old value,
 in addition t everythng they already do.
+
+
+# set button issues
+- clicking a field, which temp clears it unlocks the set button, it shouldn't unless a change is made and the normal validation logic for set button
+- it also seems that deleteing all chars from a field enabled the set button, you can't set if all fields don't hold a value, internally it would use the fallback I imagine but it is visually disruptive
+- backspacing through the fields isn't enabling the set button as changes occur
+
+## testing
+- [ ] . period      . moves forward
+- [ ] . arrow keys  . navigate forwards/backwards 
+- [ ] . backspace   . delete backwards 
+- [ ] . delete      . delete forward
+- [ ] . click       . clear contents
+- [ ] . enter       . moves forward
+
+- [ ] . shift       . invert . enter   
+
+# current bugs
+- left clicking the octets when the app doesnt have focus doesnt clear it, it should
+- 

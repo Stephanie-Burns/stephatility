@@ -12,6 +12,7 @@ from octet_widget import OctetWidget, IPManagerWidget
 
 class FolderCleanerApp:
     def __init__(self, master):
+        master.title('ViperTility') # fix this
         self.current_ip = '192.168.1.100'  # This would ideally come from a configuration or external source
 
         # Initialize other rows of widgets
