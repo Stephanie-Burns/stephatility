@@ -41,19 +41,30 @@ class OctetWidget(tk.Entry):
 
     def _validate_input(self, new_value: str, char: str, action: str) -> bool:
         if action == '1':  # Insert action
+            if char == '.':
+                # Advance to the next widget and prevent the '.' from being inserted
+                self.after_idle(self._advance_focus)
+                return False
             if not char.isdigit():
                 return False
             if len(new_value) > 3:
                 return False
-            # Allow entry if it results in a valid octet value within the range
             if new_value and 1 <= int(new_value) <= 254:
                 return True
             # Temporarily allow entering initial digits
-            if new_value == '0' or new_value == '25':
+            if new_value in ('0', '25'):
                 return True
         elif action == '0':  # Delete action
             return True
         return False
+
+    def _advance_focus(self):
+        """Advance the focus to the next widget, typically the next octet entry or the Set button."""
+        next_widget = self.tk_focusNext()
+        if isinstance(next_widget, tk.Entry) or (self.position == 3 and isinstance(next_widget, tk.Button)):
+            next_widget.focus_set()
+            if isinstance(next_widget, tk.Entry):
+                next_widget.icursor(0)
 
     def _on_mouse_click(self, event: tk.Event):
         print("Mouse click event detected.")  # Debug output
