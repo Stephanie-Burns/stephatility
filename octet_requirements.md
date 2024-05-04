@@ -137,22 +137,22 @@ thesde all need to be more clear abouyt their intent and organized
    - [x] **KP_Enter**: Mirrors the behavior of the Enter key, advancing focus forward.
    - [x] **Arrow Keys**: Left and Right Arrow keys allow navigation between octets.
    - [x] **Period (.) Key**: Mimics the Enter/Tab key functionality within the octets.
-   - [ ] **Shift+Enter** and **Shift+KP_Enter**: Need confirmation if they correctly restrict navigation from the first octet.
+   - [x] **Shift+Enter** and **Shift+KP_Enter**: restrict navigation from the first octet.
 
 3. **Data Validation and Handling**:
-   - [ ] **Set Button**: Needs implementation details about disabling based on IP address status.
+   - [x] **Set Button**: Needs implementation details about disabling based on IP address status.
    - [x] **Backspace Key**: On an empty OctletWidget, focus shifts to the previous octet. Does not move past the first octet when combined with Shift.
    - [x] **Delete Key**: Clears the content forward, similar to a typical text field interaction.
 
 4. **Focus and Input Management**:
-   - [ ] **Click on Octlet**: Clears the current input but stores it temporarily. If focus is lost without new input, the old value is restored.
-   - [ ] **Click Outside Octlet**: Focus loss without changes restores the original input. If changes are invalid upon focus loss, reverts to the last valid input or the original if no valid input was previously entered.
+   - [x] **Click on Octlet**: Clears the current input but stores it temporarily. If focus is lost without new input, the old value is restored.
+   - [x] **Click Outside Octlet**: Focus loss without changes restores the original input. If changes are invalid upon focus loss, reverts to the last valid input or the original if no valid input was previously entered.
 
 ### OctletWidget Requirements
 
 1. **Input Constraints**:
-   - [ ] **Digit Acceptance**: Accepts only numeric input with a maximum of three digits.
-   - [ ] **Valid Range**: Accepts digits from 1 to 254. Inputs like '0' and '255' are automatically rejected or corrected based on RFC standards.
+   - [x] **Digit Acceptance**: Accepts only numeric input with a maximum of three digits.
+   - [x] **Valid Range**: Accepts digits from 1 to 254. Inputs like '0' and '255' are automatically rejected or corrected based on RFC standards.
 
 2. **User Interaction**:
    - [ ] **Direct Input**: As numbers are entered, input automatically advances to the next octet under the following conditions:
