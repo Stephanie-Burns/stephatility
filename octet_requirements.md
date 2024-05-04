@@ -171,3 +171,10 @@ thesde all need to be more clear abouyt their intent and organized
 
 - [x] Navigational controls extended to include arrow keys for intra-widget navigation.
 - [x] Ensure Shift-modified keys do not allow navigation out of context, such as `Shift+Enter` not leaving the first octet.
+
+
+
+`.`, `enter`, `shift + enter`, `kp_enter`, `shift + kp_enter`
+these commands should temporarly clear the octet whenever they enter it this way fresh value can be entered
+quickly and effeciently But if no changes are made it should repooulate with the old value,
+in addition t everythng they already do.

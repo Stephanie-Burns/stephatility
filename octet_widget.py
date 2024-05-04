@@ -1,21 +1,23 @@
 import tkinter as tk
-from typing import Callable, Optional
+from typing import Callable, Optional, Any
 
 class OctetWidget(tk.Entry):
     def __init__(
             self,
-            master: tk.Widget,
-            on_advance_focus: Callable,
-            position: int,
-            initial_value: str = "",
-            update_callback: Optional[Callable] = None,
-            *args,
-            **kwargs
+            master                  : tk.Widget,
+            on_advance_focus        : Callable,
+            position                : int,
+            initial_value           : str = "",
+            update_callback         : Optional[Callable] = None,
+            *args                   : Any,
+            **kwargs                : Any
     ):
         super().__init__(master, *args, **kwargs)
-        self.on_advance_focus = on_advance_focus
-        self.position = position
-        self.update_callback = update_callback
+        self.on_advance_focus       : Callable[[int], None] = on_advance_focus
+        self.position               : int = position
+        self.update_callback        : Optional[Callable[[], None]] = update_callback
+        self.previous_valid_content : str = initial_value
+
         self.insert(0, initial_value)
         self.config(width=3, justify='center')
 
@@ -25,19 +27,7 @@ class OctetWidget(tk.Entry):
         self.bind('<FocusOut>', self._on_focus_out)
         self.bind('<KeyPress>', self._on_key_press)
         self.bind('<Button-1>', self._on_mouse_click)
-        self.previous_valid_content = initial_value
 
-        # Key handling mappings
-        self.key_handlers = {
-            'Return': self._handle_enter,
-            'KP_Enter': self._handle_enter,
-            'Tab': self._handle_tab,
-            'ISO_Left_Tab': self._handle_shift_tab,
-            'BackSpace': self._handle_backspace,
-            'Delete': self._handle_delete,
-            'Left': self._handle_left_arrow,
-            'Right': self._handle_right_arrow
-        }
 
     def _validate_input(self, new_value: str, char: str, action: str) -> bool:
         if action == '1':  # Insert action
@@ -84,7 +74,17 @@ class OctetWidget(tk.Entry):
             self.update_callback()
 
     def _on_key_press(self, event: tk.Event) -> str:
-        handler = self.key_handlers.get(event.keysym)
+        key_handlers = {
+            'Return': self._handle_enter,
+            'KP_Enter': self._handle_enter,
+            'Tab': self._handle_tab,
+            'ISO_Left_Tab': self._handle_shift_tab,
+            'BackSpace': self._handle_backspace,
+            'Delete': self._handle_delete,
+            'Left': self._handle_left_arrow,
+            'Right': self._handle_right_arrow
+        }
+        handler = key_handlers.get(event.keysym)
         if handler:
             return handler(event)
         return "continue"
