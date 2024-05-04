@@ -7,17 +7,20 @@ import tempfile
 import subprocess
 import sys
 
+from widget_ip_manager import IPManagerWidget
+from octet_widget import OctletWidget
 
 class FolderCleanerApp:
     def __init__(self, master):
-        self.master = master
-        master.title("Folder Cleaner")
+        self.current_ip = '192.168.1.100'  # This would ideally come from a configuration or external source
 
-        # Initialize multiple rows of widgets
+        # Initialize other rows of widgets
         self.initialize_dir_destruction_row(master, "C:/Viper", 0)
         self.initialize_dir_destruction_row(master, "C:/ViperConfigData", 1)
         self.initialize_file_creation_row(master, ['.py', '.cs', '.md', '.txt'], 2)
-        self.initialize_ip_manager_row(master, 3)
+
+        # Initialize IP Manager Widget
+        self.ip_manager = IPManagerWidget(master, 3, self.current_ip)
 
 
     def initialize_file_creation_row(self, master, extensions, row):
@@ -62,41 +65,6 @@ class FolderCleanerApp:
         delete_button.grid(row=row, column=3, padx=10, sticky=tk.EW)
 
         path_entry.insert(0, default_path)
-
-    def initialize_ip_manager_row(self, master, row):
-
-        self.current_ip = self.get_current_ip().split('.')
-
-        ip_frame = tk.Frame(master)
-        tk.Label(master, text="IP Address:").grid(row=row, column=1, padx=10, pady=10, sticky='w')
-        ip_frame.grid(row=row, column=1, padx=10, pady=10, sticky='e')
-        ip_parts = [
-            tk.Entry(
-                ip_frame,
-                width=3,
-                justify='center',
-                validate="key",
-                validatecommand=(master.register(self.validate_ip_part), '%P')
-            )
-            for _ in range(4)
-        ]
-
-        # Entry fields for the IP address parts
-        for i, octlet in enumerate(ip_parts):
-            octlet.insert(0, self.current_ip[i])  # Prefill with current IP octets
-            octlet.pack(side=tk.LEFT)
-            if i < 3:
-                tk.Label(ip_frame, text=".").pack(side=tk.LEFT)
-            octlet.bind('<FocusOut>', lambda e, entry=octlet, index=i: self.ensure_valid_entry(e, entry, index))
-            octlet.bind('<KeyPress>', lambda e, index=i: self.handle_key_press(e, ip_parts, index))
-            octlet.bind('<Button-1>', lambda e, entry=octlet: self.clear_entry(entry))
-
-        # Layout
-        self.set_button = tk.Button(master, text="Set", command=lambda: self.set_ip_address(ip_parts))
-        manage_button = tk.Button(master, text="Manage", command=self.manage_ip_settings)
-
-        self.set_button.grid(row=row, column=2, padx=10, pady=10, sticky='EW')  # to set focus, change later if care
-        manage_button.grid(row=row, column=3, padx=10, pady=10, sticky='EW')
 
     def ensure_valid_entry(self, event, entry, index):
         """ Ensure that each entry field has a valid IP address segment or set it to the respective current IP part. """
