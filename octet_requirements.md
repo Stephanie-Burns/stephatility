@@ -165,10 +165,8 @@ thesde all need to be more clear abouyt their intent and organized
 - [x] **Dependency Injection**: Ensure components like OctletWidgets can be tested independently by injecting dependencies during initialization.
 - [x] **OOP Principles**: Utilize encapsulation for the widgets, ensuring that each component manages its state and behavior.
 - [x] **Use of Python's `ipaddress` Module**: Leverage this for validating IP address correctness and for potentially parsing and handling IP addresses.
-- [ ] **Existing Solutions**: Research and potentially reuse existing implementations of IP address widgets or similar components to reduce development time.
 
 ### Additional Constraints Identified During Development
-
 - [x] Navigational controls extended to include arrow keys for intra-widget navigation.
 - [x] Ensure Shift-modified keys do not allow navigation out of context, such as `Shift+Enter` not leaving the first octet.
 
@@ -189,7 +187,7 @@ in addition t everythng they already do.
 - [ ] . period      . moves forward
 - [ ] . arrow keys  . navigate forwards/backwards 
 - [ ] . backspace   . delete backwards 
-- [ ] . delete      . delete forward
+- [ ] . delete      . delete forward . focus to net octet if 
 - [ ] . click       . clear contents
 - [ ] . enter       . moves forward
 
@@ -198,3 +196,47 @@ in addition t everythng they already do.
 # current bugs
 - left clicking the octets when the app doesnt have focus doesnt clear it, it should
 - 
+
+
+
+that broke stuff too,  i think we are approaching from the wrong angle so lets start to put a plan togther. We might need a major rewrite. 
+- we show know the previous and next widget, these get referennced all the time.
+- we should porobably store the octet values in a dict or list and maybe have an internal for the actual that we can reference,
+- all of our clear the widget on focus but return the value if no changes when out of focuse should be in one place , manny methods are dependent on this.
+- probably moiire things too i cant think of rn
+
+
+
+# Period Key (.) Behavior:
+## Navigation:
+- When pressed, the period key should behave like the Enter or Tab key, advancing the focus to the next OctetWidget.
+- It should advance the focus if the current OctetWidget is the last in the sequence, same as the enter key would.
+## Input Clearing:
+- Upon pressing ., the focus should move to the next OctetWidget and that widget should should clear its content to allow for quick, fresh input in the next widget.
+- If the focus moves away and no input is entered, the original content should be restored.
+## Validation:
+- If the period key is pressed when the octet is empty or has invalid content, the action should not advance the focus and should revert to the last valid content if necessary.
+## Special Cases:
+- The period should not be added to the octet content; it merely triggers navigation.
+
+# Auto-Advance on Input Completion:
+## Criteria for Advancement:
+- Three Digits: Whenever an octet has three digits entered, it automatically triggers advancement to the next widget, typically the next octet.
+- Two Valid Digits: If two digits form a valid octet between 26 and 99, advancement should also be triggered without needing a third digit.
+## Action on Advancement:
+- Clear Next Octet: Similar to the period key behavior, upon advancement, the next octet should be cleared to allow for quick, fresh input.
+- Handling Edge Cases: If the current octet is the last in the sequence, this behavior will need to handle advancing to a non-octet widget (like a button) gracefully.
+## Implementation Considerations:
+- Validation: Ensure that the current octet content is valid before advancing. If the content is not a valid number (like leading zeros or out of range), it should not advance.
+- Focus Management: Manage focus transition smoothly to ensure user experience remains fluid and intuitive.
+
+
+# Shift + Enter Key Behavior:
+## Navigation:
+- Backward Movement: When Shift + Enter is pressed, it should move the focus to the previous OctetWidget.
+- Restrict Exit from First Octet: The focus should not move out of the first octet when Shift + Enter is pressed. This ensures that the user stays within the bounds of the IP address fields.
+## Input Clearing:
+- Clear Previous Octet: Upon pressing Shift + Enter, the focus moves to the previous OctetWidget and that widget should clear its content to allow for quick, fresh input in that widget.
+- Restore Content: If the focus moves away and no input is entered, the original content should be restored in the octet that was moved to.
+## bImplementation Considerations:
+- Flag for Disabling: Include a flag that can disable this behavior, allowing for flexibility based on future requirements or user preferences.

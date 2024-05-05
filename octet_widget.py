@@ -1,206 +1,82 @@
 import tkinter as tk
 from typing import Callable, Optional, Any
 
+
 class OctetWidget(tk.Entry):
-    def __init__(
-            self,
-            master                  : tk.Widget,
-            on_advance_focus        : Callable,
-            position                : int,
-            initial_value           : str = "",
-            update_callback         : Optional[Callable] = None,
-            *args                   : Any,
-            **kwargs                : Any
-    ):
-        super().__init__(master, *args, **kwargs)
-        self.on_advance_focus       : Callable[[int], None] = on_advance_focus
-        self.position               : int = position
-        self.update_callback        : Optional[Callable[[], None]] = update_callback
-        self.previous_valid_content : str = initial_value
+    def __init__(self, master, position, initial_value="", update_callback=None):
+        super().__init__(master, width=3, justify='center')
+        self.position = position
+        self.update_callback = update_callback
+        self.previous_valid_content = initial_value if initial_value else "-1"
 
         self.insert(0, initial_value)
-        self.config(width=3, justify='center')
+        self.vcmd = (self.register(self._validate_input), '%P', '%S', '%d')
+        self.config(validate="key", validatecommand=self.vcmd)
 
-        vcmd = (master.register(self._validate_input), '%P', '%S', '%d')
-        self.config(validate='key', validatecommand=vcmd)
+        self.bind("<FocusIn>", self._on_focus_in)
+        self.bind("<FocusOut>", self._on_focus_out)
+        self.bind("<KeyPress>", self._on_key_press)
+        self.bind("<KeyRelease>", self._on_key_release)
 
-        self.bind('<FocusOut>', self._on_focus_out)
-        self.bind('<KeyPress>', self._on_key_press)
-        self.bind('<Button-1>', self._on_mouse_click)
-
-    def _validate_input(self, new_value: str, char: str, action: str) -> bool:
-        if action == '1':  # Insert action
-            if char == '.':
-                # Advance to the next widget but do not clear the current widget if not necessary
-                self.after_idle(lambda: self._advance_focus(clear_field=False))  # Ensure not to clear field on '.'
-                return False
+    def _validate_input(self, new_value, char, action):
+        """Ensure only valid numbers are entered."""
+        if action == '1':  # Key insert action
             if not char.isdigit():
                 return False
             if len(new_value) > 3:
                 return False
-            if new_value and 1 <= int(new_value) <= 254:
-                return True
-            # Temporarily allow entering initial digits
-            if new_value in ('0', '25'):
-                return True
-        elif action == '0':  # Delete action
+            if new_value == '0':  # Disallow '0' as a valid entry on its own
+                return False
+            if new_value.startswith('0') and len(new_value) > 1:  # Prevent numbers like '01', '002', etc.
+                return False
+            if int(new_value) > 254:
+                return False
             return True
-        return False
+        return True  # Always allow deletion
 
-    def _advance_focus(self, backward=False, clear_field=True):
-        """Advance the focus to the next widget, handling fields and buttons appropriately."""
-        if clear_field:
-            self.previous_valid_content = self.get()
-            self.delete(0, tk.END)
+    def _on_key_press(self, event):
+        """Handle key press for special navigation and auto-advance."""
+        if event.keysym in ('Return', 'KP_Enter', 'Tab'):
+            self._advance_focus()
+            return "break"
+        elif event.keysym == 'ISO_Left_Tab':
+            self._advance_focus(reverse=True)
+            return "break"
+        elif event.char == '.':
+            self._advance_focus()
+            return "break"
 
-        widget = self.tk_focusPrev() if backward else self.tk_focusNext()
+    def _on_key_release(self, event):
+        """Check the condition on key release and advance focus if conditions are met."""
+        key_is_digit = (9 < event.keycode < 20) or (78 < event.keycode < 91)
+        octet_value_threshold_reached = (
+                self.get() and (len(self.get()) == 3 or (len(self.get()) == 2 and int(self.get()) > 25))
+        )
+        if key_is_digit and octet_value_threshold_reached:
+            self.after_idle(self._advance_focus)
 
-        if isinstance(widget, tk.Entry):
-            widget.focus_set()
-            widget.icursor(0)
-        elif isinstance(widget, tk.Button) and not backward:
-            # Only focus the button if advancing forward; do not attempt to place the cursor
-            widget.focus_set()
+    def _advance_focus(self, reverse=False):
+        next_widget = self.tk_focusPrev() if reverse else self.tk_focusNext()
+        next_widget.focus_set()
 
-        if self.update_callback:
-            self.update_callback()
-
-    def _clear_and_focus(self, clear: bool, backward: bool = False):
-        if clear:
-            self.previous_valid_content = self.get()
-            self.delete(0, tk.END)
-        if backward:
-            prev_widget = self.tk_focusPrev()
-            if isinstance(prev_widget, tk.Entry):
-                prev_widget.focus_set()
-                prev_widget.icursor(len(prev_widget.get()))
-        else:
-            next_widget = self.tk_focusNext()
-            if isinstance(next_widget, tk.Entry):
-                next_widget.focus_set()
-                next_widget.icursor(0)
-
-    def _on_mouse_click(self, event: tk.Event):
-        self._clear_and_focus(True)
-
-    def _on_focus_out(self, event: tk.Event):
+    def _on_focus_in(self, event):
+        """Clear entry temporarily when gaining focus if it's not empty."""
         current_value = self.get()
-        if not current_value:
-            self.insert(0, self.previous_valid_content)
-        elif not current_value.isdigit() or not (1 <= int(current_value) <= 254):
+        if current_value:
+            self.previous_valid_content = current_value
             self.delete(0, tk.END)
+
+    def _on_focus_out(self, event):
+        """Restore previous content if no valid entry is made."""
+        if not self.get():
             self.insert(0, self.previous_valid_content)
-        if self.update_callback:
-            self.update_callback()
 
-    def _on_key_press(self, event: tk.Event) -> str:
-        """Handle key press with specific actions for different keys."""
-        key_handlers = {
-            'Return': lambda e: self._handle_enter(e),
-            'KP_Enter': lambda e: self._handle_enter(e),
-            'Tab': self._handle_tab,
-            'ISO_Left_Tab': self._handle_shift_tab,
-            'BackSpace': self._handle_backspace,
-            'Delete': self._handle_delete,
-            'Left': self._handle_left_arrow,
-            'Right': self._handle_right_arrow
-        }
-        handler = key_handlers.get(event.keysym)
-        if handler:
-            return handler(event)
-        return "continue"
-
-    def _handle_backspace(self, event: tk.Event) -> str:
-        if self.get() == "" and self.position == 0:
-            # If the first octet is empty and backspace is pressed, do nothing
-            return "break"
-        elif self.index('insert') == 0:
-            # If the cursor is at the start of the octet, move focus backward
-            prev_widget = self.tk_focusPrev()
-            if isinstance(prev_widget, tk.Entry):
-                prev_widget.focus_set()
-                prev_widget.icursor(len(prev_widget.get()))  # Position cursor at the end
-            self.update_callback()
-            return "break"
-        return "continue"  # Allow normal backspace operation
-
-    def _handle_delete(self, event: tk.Event) -> str:
-        current_text = self.get()
-        cursor_pos = self.index('insert')
-        if cursor_pos < len(current_text):
-            self.delete(cursor_pos, cursor_pos + 1)
-        elif cursor_pos == len(current_text) and self.position != 3:
-            # If at the end of the octet and not the last one, move forward without clearing
-            self._advance_focus(clear_field=False)
-        self.update_callback()
+    def _on_tab_press(self, event):
+        self._advance_focus()
         return "break"
 
-    def _handle_enter(self, event: tk.Event) -> str:
-        """Handle Enter and KP_Enter keys, considering the Shift modifier."""
-        if not (event.state & 0x0001):  # No Shift key
-            if self.get() == "":
-                # If the octet is empty, restore previous content
-                self.insert(0, self.previous_valid_content)
-            self._advance_focus(clear_field=False)  # Move focus without clearing
-            self.update_callback()
-            return "break"
-        else:  # Shift key held
-            if self.position == 0:
-                # Prevent leaving the first octet and ensure cursor is at the start
-                self.focus_set()
-                self.icursor(0)  # Set cursor at the start of the octet
-                return "break"
-            # Move focus to the previous widget and place the cursor at the end of its content
-            prev_widget = self.tk_focusPrev()
-            if isinstance(prev_widget, tk.Entry):
-                prev_widget.focus_set()
-                prev_widget.icursor(len(prev_widget.get()))
-            self.update_callback()
-            return "break"
-
-    def _handle_left_arrow(self, event: tk.Event) -> str:
-        if self.index('insert') == 0:
-            prev_widget = self.tk_focusPrev()
-            if isinstance(prev_widget, tk.Entry):
-                prev_widget.focus_set()
-                prev_widget.icursor(len(prev_widget.get()))
-            self.update_callback()
-            return "break"
-
-    def _handle_right_arrow(self, event: tk.Event) -> str:
-        if self.index('insert') == len(self.get()):
-            next_widget = self.tk_focusNext()
-            if isinstance(next_widget, tk.Entry):
-                next_widget.focus_set()
-                next_widget.icursor(0)
-            self.update_callback()
-            return "break"
-
-    def _handle_tab(self, event: tk.Event) -> str:
-        """Handle Tab key, advancing focus forward and restoring content if necessary."""
-        if self.get() == "":
-            # If the octet is empty, restore the previous valid content
-            self.insert(0, self.previous_valid_content)
-        self._advance_focus(clear_field=False)  # Move focus to the next widget without clearing
-        self.update_callback()
-        return "break"
-
-    def _handle_shift_tab(self, event: tk.Event) -> str:
-        """Handle Shift+Tab key, moving focus backward and allowing exit from the first octet."""
-        if self.position == 0:  # If it's the first octet, allow the focus to move out
-            prev_widget = self.tk_focusPrev()
-            if prev_widget:  # Ensure there is a widget to focus on
-                prev_widget.focus_set()
-                if isinstance(prev_widget, tk.Entry):
-                    prev_widget.icursor(len(prev_widget.get()))  # Place cursor at the end
-            self.update_callback()
-            return "break"
-        # For other octets, handle as usual
-        prev_widget = self.tk_focusPrev()
-        prev_widget.focus_set()
-        if isinstance(prev_widget, tk.Entry):
-            prev_widget.icursor(len(prev_widget.get()))  # Place cursor at the end
-        self.update_callback()
+    def _on_shift_tab_press(self, event):
+        self._advance_focus(reverse=True)
         return "break"
 
 
@@ -218,7 +94,7 @@ class IPManagerWidget:
 
         self.octets = []
         for i in range(4):
-            octet = OctetWidget(ip_frame, self._advance_focus, i, self.current_ip[i], update_callback=self._update_set_button_state)
+            octet = OctetWidget(ip_frame, i, self.current_ip[i], update_callback=self._update_set_button_state)
             octet.pack(side=tk.LEFT, expand=True, fill='both')
             if i < 3:
                 tk.Label(ip_frame, text=".").pack(side=tk.LEFT)
@@ -248,13 +124,14 @@ class IPManagerWidget:
 
     def _manage_ip_settings(self):
         print("IP Settings management invoked")
-
+        for octet in self.octets:
+            print(f'{octet.get()=}, {octet.previous_valid_content=}')
+            # will have to make this check when reading ^
 
 def main():
     root = tk.Tk()
     ip_manager = IPManagerWidget(root, "192.168.1.100", 3)
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
