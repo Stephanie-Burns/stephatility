@@ -262,3 +262,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# key_is_digit = (9 < event.keycode < 20) or (78 < event.keycode < 91)

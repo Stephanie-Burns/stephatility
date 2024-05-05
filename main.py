@@ -7,7 +7,7 @@ import tempfile
 import subprocess
 import sys
 
-from octet_widget import OctetWidget, IPManagerWidget
+from ip_manager_container import IPManager
 
 
 class FolderCleanerApp:
@@ -15,13 +15,13 @@ class FolderCleanerApp:
         master.title('ViperTility') # fix this
         self.current_ip = '192.168.1.100'  # This would ideally come from a configuration or external source
 
-        # Initialize other rows of widgets
+        # Initialize Containers
         self.initialize_dir_destruction_row(master, "C:/Viper", 0)
         self.initialize_dir_destruction_row(master, "C:/ViperConfigData", 1)
         self.initialize_file_creation_row(master, ['.py', '.cs', '.md', '.txt'], 2)
 
-        # Initialize IP Manager Widget
-        self.ip_manager = IPManagerWidget(master, self.current_ip, 3)
+        # Initialize IP Manager Container
+        self.ip_manager = IPManager(master, self.current_ip, 3)
 
     def initialize_file_creation_row(self, master, extensions, row):
         # Dropdown for file extensions
