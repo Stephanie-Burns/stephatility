@@ -7,64 +7,69 @@ import tempfile
 import subprocess
 import sys
 
-from ip_manager_container import IPManager
+from containers.ip_manager_container import IPManager
 
 
-class FolderCleanerApp:
-    def __init__(self, master):
-        master.title('ViperTility') # fix this
+class FolderCleanerApp(tk.Frame):
+    def __init__(self, parent: tk.Widget, **kwargs):
+        super().__init__(parent, **kwargs)
+
         self.current_ip = '192.168.1.100'  # This would ideally come from a configuration or external source
 
+        for i in range(4):
+            self.grid_columnconfigure(i, weight=1)
+
         # Initialize Containers
-        self.initialize_dir_destruction_row(master, "C:/Viper", 0)
-        self.initialize_dir_destruction_row(master, "C:/ViperConfigData", 1)
-        self.initialize_file_creation_row(master, ['.py', '.cs', '.md', '.txt'], 2)
+        self.initialize_dir_destruction_row("C:/Viper", 0)
+        self.initialize_dir_destruction_row("C:/ViperConfigData", 1)
+        self.initialize_file_creation_row(['.py', '.cs', '.md', '.txt'], 2)
+        self.initialize_ip_manager_row(3)
 
-        # Initialize IP Manager Container
-        self.ip_manager = IPManager(master, self.current_ip, 3)
-
-    def initialize_file_creation_row(self, master, extensions, row):
+    def initialize_file_creation_row(self, extensions, row):
         # Dropdown for file extensions
         file_extension = tk.StringVar()
 
         extension_picker = ttk.Combobox(
-            master,
+            self,
             textvariable=file_extension,
             values=extensions,
             state='readonly'
         )
         # Button to create and open scratch file
         create_open_button = tk.Button(
-            master,
+            self,
             text="Create and Open Scratch File",
             command=lambda: self.create_and_open_scratch_file(file_extension)
         )
 
-        extension_picker.grid(row=row, column=1, padx=10, pady=10, sticky=tk.EW)
+        extension_picker.grid(row=row, column=0, columnspan=2, padx=10, pady=10, sticky=tk.EW)
         create_open_button.grid(row=row, column=2, columnspan=2, padx=10, pady=10, sticky=tk.EW)
 
         extension_picker.set(extensions[0])  # default value
 
-    @staticmethod
-    def initialize_dir_destruction_row(master, default_path, row):
-        path_entry = tk.Entry(master, width=50)
+    def initialize_dir_destruction_row(self, default_path, row):
+        path_entry = tk.Entry(self, width=50)
 
         browse_button = tk.Button(
-            master,
+            self,
             text="Browse",
             command=lambda: FolderCleanerApp.browse_folder(path_entry)
         )
         delete_button = tk.Button(
-            master,
+            self,
             text="Delete Contents",
             command=lambda: FolderCleanerApp.delete_contents(path_entry)
         )
 
-        path_entry.grid(row=row, column=1, padx=10, pady=10, sticky=tk.EW)
+        path_entry.grid(row=row, column=0, columnspan=2, padx=10, pady=10, sticky=tk.EW)
         browse_button.grid(row=row, column=2, padx=10, sticky=tk.EW)
         delete_button.grid(row=row, column=3, padx=10, sticky=tk.EW)
 
         path_entry.insert(0, default_path)
+
+    def initialize_ip_manager_row(self, row):
+        ip_manager = IPManager(self, self.current_ip, 3)
+        ip_manager.grid(row=row, column=0, columnspan=4, sticky=tk.EW)
 
     @staticmethod
     def browse_folder(path_entry):
@@ -99,7 +104,9 @@ class FolderCleanerApp:
 
 def main():
     root = tk.Tk()
+    root.title('ViperTility')
     app = FolderCleanerApp(root)
+    app.pack()
     root.mainloop()
 
 
