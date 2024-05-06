@@ -32,13 +32,17 @@ class IPManager:
                 update_callback=self._update_set_button_state
             )
             octet.bind("<FocusOut>", lambda event, idx=i: self.octet_focus_out(event, idx))
-            octet.grid(row=0, column=i, padx=5)
+            octet.pack(side=tk.LEFT)
+
+            if i < 3:
+                tk.Label(self.ip_frame, text=".").pack(side=tk.LEFT, padx=3)
+
             self.octets.append(octet)
 
         self.set_button.grid(row=self.row, column=2, padx=10, pady=10, sticky='EW')
         self.manage_button.grid(row=self.row, column=3, padx=10, pady=10, sticky='EW')
 
-        self._update_set_button_state()  # Initial check
+        self._update_set_button_state()             # Initial check
 
     def octet_focus_out(self, event, idx):
         """Handle focus out for each octet and update the 'Set' button state."""
@@ -80,6 +84,14 @@ class IPManager:
         for octet in self.octets:
             print(f'{octet.get()=}, {octet.previous_valid_content=}')
             # will have to make this check when reading ^
+
+    def _backend_ip_change(self):
+        print("Passing to script...")
+        print("Backend IP Changed")
+
+    def _backend_ip_read(self):
+        print("Passing to Windows IP Manager...")
+        print("Backend IP is...")
 
 
 def main():
