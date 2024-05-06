@@ -1,6 +1,6 @@
 
 import tkinter as tk
-from octet_widget import OctetWidget
+from containers.widgets.octet_widget import OctetWidget
 
 
 class IPSettingsControl(tk.Toplevel):

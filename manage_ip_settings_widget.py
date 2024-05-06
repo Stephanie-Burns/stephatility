@@ -1,11 +1,11 @@
 import tkinter as tk
-from tkinter import Toplevel, Label, Entry, Frame, Button
+from tkinter import Toplevel, Entry, Frame, Button
 
-from octet_widget import OctetWidget
+from containers.widgets.octet_widget import OctetWidget
 
 class IPManagementFrame(Toplevel):
-    def __init__(self, master, current_ip, update_callback=None):
-        super().__init__(master)
+    def __init__(self, parent, current_ip, update_callback=None):
+        super().__init__(parent)
         self.title("IP Settings Management")
         # self.geometry("600x400")  # Adjust size as needed
         # self.resizable(False, False)
@@ -14,6 +14,11 @@ class IPManagementFrame(Toplevel):
         self.update_callback = update_callback
 
         self.init_ui()
+
+        # Make the window modal
+        self.transient(parent)  # Set to be a transient window of its parent
+        self.grab_set()  # Direct all events to this window
+        self.wait_window(self)  # Wait here until this window is destroyed
 
     def init_ui(self):
         #cool label
@@ -102,6 +107,13 @@ class IPManagementFrame(Toplevel):
     def get_ip_entries(self):
         # Retrieve the IP address from entries (this will be simplified for demonstration)
         return ".".join(entry.get() for entry in self.ip_frame1.winfo_children() if isinstance(entry, Entry))
+
+    def destroy(self):
+        print("Closing IP management window")
+        if self.update_callback:
+            self.update_callback()
+        super().destroy()
+
 
 
 def main():

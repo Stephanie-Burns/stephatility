@@ -1,6 +1,7 @@
 import unittest
 import tkinter as tk
-from octet_widget import OctetWidget, IPManagerWidget
+from containers.widgets.octet_widget import OctetWidget
+
 
 class TestOctetWidget(unittest.TestCase):
     def setUp(self):
