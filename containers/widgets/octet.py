@@ -5,7 +5,7 @@ from typing import Callable, Optional
 import enums
 
 
-class OctetWidget(tk.Entry):
+class Octet(tk.Entry):
     """A widget representing a single octet (byte) of an IP address.
 
     An octet is an 8-bit field, which holds values from 1 to 254 in this context, as required for a valid IPv4 address.
@@ -179,8 +179,8 @@ def main():
     frame.pack(padx=10, pady=10)
 
     # Initialize two octets for demonstration
-    octet1 = OctetWidget(frame, position=0, initial_value="192")
-    octet2 = OctetWidget(frame, position=1, initial_value="168")
+    octet1 = Octet(frame, position=0, initial_value="192")
+    octet2 = Octet(frame, position=1, initial_value="168")
 
     octet1.pack(side=tk.LEFT, padx=5)
     octet2.pack(side=tk.LEFT, padx=5)
