@@ -22,7 +22,7 @@ class Octet(tk.Entry):
     - If focus is lost without entering a valid value, the previous valid value is restored.
 
     Args:
-        master (tk.Widget): The parent widget.
+        parent (tk.Widget): The parent widget.
         position (int): The position of this octet within its group.
         initial_value (str, optional): The default value to be placed in the widget.
         update_callback (Callable[[], None], optional): A function to run when the widget updates.
@@ -36,13 +36,14 @@ class Octet(tk.Entry):
     """
     def __init__(
             self,
-            master                      : tk.Widget,
+            parent                      : tk.Widget,
             position                    : int,
             initial_value               : str = "",
-            update_callback             : Optional[Callable[..., None]] = None
+            update_callback             : Optional[Callable[..., None]] = None,
+            **kwargs
     ):
         # Widget Setup
-        super().__init__(master, width=3, justify='center')
+        super().__init__(parent, width=3, justify='center', **kwargs)
         self.insert(0, initial_value)
 
         #  Public Attributes
@@ -60,14 +61,16 @@ class Octet(tk.Entry):
         # Event Bindings
         self.bind("<FocusIn>", self._on_focus_in)
         self.bind("<FocusOut>", self._on_focus_out)
+
         self.bind("<KeyPress>", self._on_key_press)
         self.bind("<KeyRelease>", self._on_key_release)
 
-    def _emit_update(self, *args, **kwargs):
-        if self.update_callback:
-            self.update_callback(*args, **kwargs)
+        self.bind("<Shift-Return>", self._on_shift_key_press)
+        self.bind("<Shift-KP_Enter>", self._on_shift_key_press)
+        self.bind("<ISO_Left_Tab>", self._on_shift_key_press)
 
-    def _validate_input(self, new_value: str, char: str, action: str) -> bool:
+    @staticmethod
+    def _validate_input(new_value: str, char: str, action: str) -> bool:
         """Ensure only valid Arabic numerals are allowed to populate the entry box in accordance with RFC 791."""
         if action == enums.EntryValidation.INSERT:
             if not char.isdigit():
@@ -76,69 +79,69 @@ class Octet(tk.Entry):
             if len(new_value) > 3:
                 return False
 
-            if new_value == '0':
-                return False
-
             if new_value.startswith('0') and len(new_value) > 1:
                 return False
 
-            if int(new_value) > 254:
+            if int(new_value) > 255:
                 return False
 
-            self.after_idle(self._emit_update)
+            # self.after_idle(lambda: self._emit_update(self.position, new_value))
             return True
 
-        self.after_idle(self._emit_update)
+        # self.after_idle(lambda: self._emit_update(self.position, new_value))
         return True  # Always allow deletion
 
     def _octet_value_threshold_reached(self) -> bool:
         """Determine if the current octet's value meets the criteria for being considered complete.
 
-        An octet is deemed complete under two conditions:
+        An octet is deemed complete under the following conditions:
 
-        1. It contains exactly three digits.
-        2. It contains two digits, both forming a valid segment of an IP address (26-99),
-           ensuring no further valid digit can be added without exceeding the maximum octet value of 254.
+        1. It contains exactly three digits and equals "255".
+        2. It contains exactly one digit and equals "0".
+        3. It contains two digits and is between 26 and 99, ensuring no further valid digit can be added
+           without exceeding the maximum octet value of 254.
 
         Returns:
             bool: True if the octet meets the completion criteria, otherwise False.
         """
-        return self.get() and (len(self.get()) == 3 or (len(self.get()) == 2 and int(self.get()) > 25))
+        value = self.get()
+        if value:
+
+            if value == "255" or value == "0":
+                return True
+            elif len(value) == 2 and 26 <= int(value) <= 99:
+                return True
+            elif len(value) == 3 and 100 <= int(value) < 255:
+                return True
+
+        return False
 
     def _on_key_press(self, event: tk.Event) -> str:
-        """Handle key press for special navigation and auto-advance."""
-        shift_pressed = event.state == enums.SHIFT_MODIFIER_APPLIED_CODE
+        """Handle key press for special navigation and auto-advance without Shift key."""
+        if event.keysym in (
+                enums.KeySym.Return,
+                enums.KeySym.KP_Enter,
+                enums.KeySym.Tab
+        ) or event.char == enums.KeySym.Period:
+            self._modify_focus()
+            return enums.EventAction.BREAK
+
+    def _on_shift_key_press(self, event: tk.Event) -> str:
+        """Handle shift-modified key presses for navigation."""
         first_octet = self.position == 0
 
         if event.keysym in (enums.KeySym.Return, enums.KeySym.KP_Enter):
-
-            if shift_pressed:
-                if not first_octet:
-                    self._modify_focus(reverse=True)
-                    return enums.EventAction.BREAK
-                else:
-                    return enums.EventAction.BREAK
-            else:
-                self._modify_focus()
-                return enums.EventAction.BREAK
-
-        elif event.keysym == enums.KeySym.Tab:
-            self._modify_focus()
+            if not first_octet:
+                self._modify_focus(reverse=True)
             return enums.EventAction.BREAK
 
         elif event.keysym == enums.KeySym.ISO_Left_Tab:
             self._modify_focus(reverse=True)
             return enums.EventAction.BREAK
 
-        elif event.char == enums.KeySym.Period:
-            self._modify_focus()
-            return enums.EventAction.BREAK
-
     def _on_key_release(self, event: tk.Event) -> None:
         """Actions to preform when a key is released."""
-        key_is_digit = event.keycode in enums.DIGIT_KEYCODES
-
-        if key_is_digit and self._octet_value_threshold_reached():
+        if self._octet_value_threshold_reached():
             self.after_idle(self._modify_focus)
 
     def _on_focus_in(self, event: tk.Event) -> None:
@@ -152,6 +155,8 @@ class Octet(tk.Entry):
         """Restore previous content if no valid entry is made."""
         if not self.get():
             self.insert(0, self.previous_valid_content)
+        print(self.get())
+        self.after_idle(lambda: self._emit_update(self.position, self.get()))
 
     def _modify_focus(self, reverse: bool = False) -> None:
         """Change focus to the next or previous widget based on the direction."""
@@ -159,15 +164,9 @@ class Octet(tk.Entry):
         next_widget = self.tk_focusPrev() if reverse else self.tk_focusNext()
         next_widget.focus_set()
 
-    def _on_tab_press(self, event: tk.Event) -> str:
-        """Advance focus to the next widget on tab press."""
-        self._modify_focus()
-        return enums.EventAction.BREAK
-
-    def _on_shift_tab_press(self, event: tk.Event) -> str:
-        """Advance focus to the previous widget on shift+tab press."""
-        self._modify_focus(reverse=True)
-        return enums.EventAction.BREAK
+    def _emit_update(self, *args, **kwargs):
+        if self.update_callback:
+            self.update_callback(*args, **kwargs)
 
 
 def main():
