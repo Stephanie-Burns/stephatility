@@ -25,7 +25,8 @@ class TempFileGenerator(tk.Frame):
             self,
             textvariable=self.current_file_extension,
             values=self.all_file_extensions,
-            state='readonly'
+            state='readonly',
+            width=50
         )
         self.file_extension_picker.grid(column=0, row=0, padx=10, pady=10, sticky=tk.W)
         self.file_extension_picker.set(self.all_file_extensions[0])     # default value
@@ -33,8 +34,9 @@ class TempFileGenerator(tk.Frame):
         # Button - Create and Open
         self.create_open_button = tk.Button(
             self,
-            text="Create and Open Scratch File",
-            command=self.create_and_open_scratch_file
+            text="Open Scratch File",
+            command=self.create_and_open_scratch_file,
+            width=20
         )
         self.create_open_button.grid(column=1, row=0, padx=10, pady=10, sticky=tk.E)
 
