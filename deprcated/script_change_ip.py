@@ -1,6 +1,6 @@
 
 import argparse
-from engine.windows_ip_manager import WindowsIPManager  # Assuming your class is in this module
+from engine.windows_ip_manager import QuickWinIP  # Assuming your class is in this module
 
 
 def main():
@@ -11,11 +11,11 @@ def main():
     parser.add_argument('--interface', default='Ethernet', help='Interface to configure')
     args = parser.parse_args()
 
-    ip_manager = WindowsIPManager(interface_name=args.interface)
+    ip_manager = QuickWinIP(interface_name=args.interface)
     if ip_manager.is_admin():
-        print(f"Running as admin! Current IP Address: {ip_manager.current_ip}")
+        print(f"Running as admin! Current IP Address: {ip_manager.ip_address}")
         if ip_manager.set_ip(args.set_ip, args.subnet_mask, args.gateway):
-            print(f"Updated IP Address: {ip_manager.current_ip}")
+            print(f"Updated IP Address: {ip_manager.ip_address}")
         else:
             print("Failed to update IP address.")
     else:

@@ -3,39 +3,81 @@ import ctypes
 import sys
 import subprocess
 import re
-from typing import Optional
+from typing import List, Optional
 from contextlib import contextmanager, redirect_stdout, redirect_stderr
 
+from network_utils import NetworkConfiguration, IPV4Address
 
-class WindowsIPManager:
-    def __init__(self, interface_name: str = 'Ethernet') -> None:
-        self._interface_name: str = interface_name
-        self._current_ip: Optional[str] = None
-        self.update_current_ip()
+
+class QuickWinIP:
+    def __init__(self, network_adapter: str = 'Ethernet') -> None:
+        self.network_config = NetworkConfiguration(
+            adapter_name=network_adapter,
+            ip_address=IPV4Address(["0", "0", "0", "0"]),
+            subnet_mask=IPV4Address(["255", "255", "255", "0"]),
+            default_gateway=IPV4Address(["0", "0", "0", "0"])
+        )
+        self.request_network_configuration()
 
     @property
-    def current_ip(self) -> Optional[str]:
-        """Get the current IP address."""
-        return self._current_ip
+    def network_adapter(self) -> str:
+        """Get the network adapter being used."""
+        return self.network_config.adapter_name
 
-    @current_ip.setter
-    def current_ip(self, value: str) -> None:
-        if not self.check_ip_availability(value):
-            self._current_ip = value
+    @network_adapter.setter
+    def network_adapter(self, name: str) -> None:
+        """Set the network adapter to be used."""
+        self._adapter = name
+
+        print(f"Changing Network Adapter from {self._adapter} to {name}")
+        self._adapter = name
+        self.request_network_configuration()
+
+
+
+    @property
+    def ip_address(self) -> Optional[str]:
+        """Get the current IP address."""
+        return self._ip
+
+    @ip_address.setter
+    def ip_address(self, value: str) -> None:
+        if not self.ip_available(value):
+            self._ip = value
             print(f"IP address set to {value}")
         else:
             print(f"IP address {value} is already in use. No change applied.")
 
-    @property
-    def interface_name(self) -> str:
-        """Get the name of the network interface."""
-        return self._interface_name
 
-    @interface_name.setter
-    def interface_name(self, value: str) -> None:
-        print(f"Changing interface from {self._interface_name} to {value}")
-        self._interface_name = value
-        self.update_current_ip()
+    @property
+    def subnet_mask(self):
+        """Get the subnet mask of the network."""
+        return self._subnet_mask
+
+    @subnet_mask.setter
+    def subnet_mask(self, value):
+        """Set the subnet mask of the network."""
+        self._subnet_mask = value
+
+
+    @property
+    def default_gateway(self):
+        """Get the network gateway address."""
+        return self._gateway
+
+    @default_gateway.setter
+    def default_gateway(self, value):
+        """Set the network gateway address."""
+        self._gateway = value
+
+
+
+
+
+
+
+
+
 
     @staticmethod
     def is_admin() -> bool:
@@ -46,7 +88,7 @@ class WindowsIPManager:
             return False
 
     @staticmethod
-    def check_ip_availability(ip: str) -> bool:
+    def ip_available(ip: str) -> bool:
         """Check if the given IP address is in use on the network."""
         response = subprocess.run(['ping', '-n', '1', '-w', '1000', ip], stdout=subprocess.DEVNULL)
         return response.returncode == 0
@@ -56,23 +98,23 @@ class WindowsIPManager:
         if not self.is_admin():
             ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
-    def update_current_ip(self) -> None:
+    def request_network_configuration(self) -> None:
         """Update the current IP address from the system configuration."""
         result = subprocess.run(["ipconfig"], capture_output=True, text=True)
         pattern = rf"{self._interface_name}.*?IPv4 Address[ .:]+([\d.]+)"
         match = re.search(pattern, result.stdout, re.S)
-        self._current_ip = match.group(1) if match else None
+        self._ip = match.group(1) if match else None
 
     def set_ip(self, new_ip: str, subnet_mask: str = "255.255.255.0", gateway: str = "192.168.1.1") -> bool:
         """Set a new IP address for the interface."""
-        if self.check_ip_availability(new_ip):
+        if self.ip_available(new_ip):
             print(f"IP address {new_ip} is already in use on the network.")
             return False
 
         command = f"netsh interface ip set address name=\"{self._interface_name}\" static {new_ip} {subnet_mask} {gateway}"
         result = subprocess.run(command, capture_output=True, text=True, shell=True)
         if result.returncode == 0:
-            self._current_ip = new_ip
+            self._ip = new_ip
             print(f"IP address changed successfully to {new_ip}.")
             return True
         else:
@@ -92,14 +134,14 @@ def redirect_output_to_file(file_path: str):
 
 
 def main() -> None:
-    ip_manager = WindowsIPManager()
+    ip_manager = QuickWinIP()
     if not ip_manager.is_admin():
         print("Not running as admin. Trying to elevate privileges.")
         ip_manager.run_as_admin()
     else:
-        print(f"Running as an admin! Current IP Address: {ip_manager.current_ip}")
+        print(f"Running as an admin! Current IP Address: {ip_manager.ip_address}")
         if ip_manager.set_ip('192.168.1.37'):
-            print(f"Updated IP Address: {ip_manager.current_ip}")
+            print(f"Updated IP Address: {ip_manager.ip_address}")
 
 
 if __name__ == "__main__":

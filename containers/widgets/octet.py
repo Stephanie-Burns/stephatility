@@ -2,7 +2,7 @@
 import tkinter as tk
 from typing import Callable, Optional
 
-import enums
+from containers import enums
 
 
 class Octet(tk.Entry):
