@@ -2,12 +2,6 @@
 from enum import StrEnum
 
 
-NUMBER_ROW_DIGIT_KEY_CODES      = range(9, 20)
-NUMPAD_DIGIT_KEY_CODES          = range(78, 91)
-DIGIT_KEYCODES                  = NUMBER_ROW_DIGIT_KEY_CODES and NUMPAD_DIGIT_KEY_CODES
-SHIFT_MODIFIER_APPLIED_CODE     = 17
-
-
 class EventAction(StrEnum):
     """Enumeration of actions to take in response to TkInter events."""
     BREAK = "break"
