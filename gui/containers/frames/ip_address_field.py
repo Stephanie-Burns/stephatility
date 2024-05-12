@@ -1,9 +1,9 @@
 
 import tkinter as tk
 
-from typing import Callable, List, Optional
+from typing import Callable, Optional
 
-from containers.widgets.octet import Octet
+from gui.containers.widgets.octet import Octet
 from engine.ipv4_network_management import IPV4Address
 from mixins import CallbackMixin
 

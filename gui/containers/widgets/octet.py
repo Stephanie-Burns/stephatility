@@ -2,7 +2,7 @@
 import tkinter as tk
 from typing import Callable, Optional
 
-from containers import enums
+from gui.containers import enums
 from mixins import CallbackMixin
 
 
