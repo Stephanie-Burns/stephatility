@@ -2,8 +2,9 @@
 import tkinter as tk
 from typing import List
 
-from containers.widgets.octet_widget import OctetWidget
-from manage_ip_settings_widget import IPManagementFrame
+from containers.widgets.octet import Octet
+from deprcated.manage_ip_settings_widget import IPManagementFrame
+from containers.toplevel.ip_settings_modal import IPSettingsModal
 
 
 class IPManager(tk.Frame):
@@ -20,9 +21,9 @@ class IPManager(tk.Frame):
 
         self.label          : tk.Label          = tk.Label(self, text="IP Address:")
         self.ip_frame       : tk.Frame          = tk.Frame(self)
-        self.octets         : List[OctetWidget] = []
-        self.set_button     : tk.Button         = tk.Button(self, text="Set", command=self._set_ip_address)
-        self.manage_button  : tk.Button         = tk.Button(self, text="Manage", command=self._manage_ip_settings)
+        self.octets         : List[Octet] = []
+        self.set_button     : tk.Button         = tk.Button(self, text="Apply", command=self._set_ip_address, width=20)
+        self.manage_button  : tk.Button         = tk.Button(self, text="Manage", command=self._manage_ip_settings, width=20)
         self.setup()
 
     def setup(self):
@@ -35,7 +36,7 @@ class IPManager(tk.Frame):
         self.ip_frame.grid(row=self.row, column=1, padx=(63, 20), pady=10, sticky='e')
 
         for i in range(4):
-            octet = OctetWidget(
+            octet = Octet(
                 self.ip_frame,
                 i,
                 initial_value=self._octet_values[i],
@@ -100,7 +101,7 @@ class IPManager(tk.Frame):
             # will have to make this check when reading ^
 
         if not self.management_frame or not self.management_frame.winfo_exists():
-            self.management_frame = IPManagementFrame(self, self.current_ip, self.update_ip_settings)
+            self.management_frame = IPSettingsModal(self)
 
     def on_management_frame_close(self):
         # Properly handle the close operation
