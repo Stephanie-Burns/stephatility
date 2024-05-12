@@ -37,7 +37,7 @@ Here is a basic example of how to set up and use the OctetWidget within a tkinte
 
 ```python
 import tkinter as tk
-from containers.widgets.octet_widget import OctetWidget
+from gui.containers.widgets import OctetWidget
 
 
 def main():

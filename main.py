@@ -1,9 +1,9 @@
 
 import tkinter as tk
 
-from containers.directory_cleaner import DirectoryCleaner
-from containers.tempfile_generator import TempFileGenerator
-from containers.ip_manager import IPManager
+from gui.containers.directory_cleaner import DirectoryCleaner
+from gui.containers.tempfile_generator import TempFileGenerator
+from gui.containers.ip_manager import IPManager
 from engine.ipv4_network_management import IPV4Address
 
 class UtilApp(tk.Frame):

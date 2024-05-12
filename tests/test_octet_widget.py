@@ -1,6 +1,6 @@
 import unittest
 import tkinter as tk
-from containers.widgets.octet_widget import OctetWidget
+from gui.containers.widgets import OctetWidget
 
 
 class TestOctetWidget(unittest.TestCase):

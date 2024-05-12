@@ -1,11 +1,9 @@
 
 import copy
 import tkinter as tk
-from typing import List
 
-
-from containers.toplevel.ip_settings_modal import IPSettingsModal
-from containers.frames.ip_address_field import IPV4AddressBox
+from gui.containers.toplevel.ip_settings_modal import IPSettingsModal
+from gui.containers.frames.ip_address_field import IPV4AddressBox
 from engine.ipv4_network_management import IPV4Address
 
 class IPManager(tk.Frame):

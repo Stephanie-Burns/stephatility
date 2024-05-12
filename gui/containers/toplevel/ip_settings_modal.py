@@ -1,7 +1,7 @@
 
 import tkinter as tk
 
-from containers.frames.ip_address_field import IPV4AddressBox
+from gui.containers.frames.ip_address_field import IPV4AddressBox
 from engine.ipv4_network_management import IPV4Address
 from mixins import CallbackMixin
 
