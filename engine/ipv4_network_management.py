@@ -6,8 +6,7 @@ import subprocess
 from dataclasses import dataclass, field
 from typing import List, Iterable
 
-from deprcated.network_utils import IPV4Address
-from enums import AdapterType
+from engine.enums import AdapterType
 
 
 @dataclass

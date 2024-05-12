@@ -2,26 +2,26 @@
 import tkinter as tk
 
 from typing import Callable, List, Optional
+
 from containers.widgets.octet import Octet
+from engine.ipv4_network_management import IPV4Address
+from mixins import CallbackMixin
 
 
-class IPV4AddressBox(tk.Frame):
+class IPV4AddressBox(CallbackMixin, tk.Frame):
     def __init__(
             self,
             parent          : tk.Widget,
-            current_ip      : List[str],
+            current_ip      : IPV4Address,
             update_callback : Optional[Callable[..., None]] = None,
             **kwargs
     ):
-        super().__init__(parent, **kwargs)
-
-        # Public Attributes
-        self.update_callback = update_callback
+        super().__init__(update_callback, parent, **kwargs)
 
         # Private Attributes
         self._current_ip = current_ip
 
-        # Frame - Directory Cleaner
+        # Frame - IPV4Address Box
         self.grid(sticky='ew', padx=10, pady=10)
 
         # Entry - Octet
@@ -43,9 +43,9 @@ class IPV4AddressBox(tk.Frame):
                 self.grid_columnconfigure(2 * i + 1, weight=0)
 
     @property
-    def ip_address(self) -> str:
+    def ip_address(self) -> IPV4Address:
         """Property to get the current IP address as a formatted string."""
-        return '.'.join(self._current_ip)
+        return self._current_ip
 
     def _on_octet_change(self, position: int, new_value: str) -> None:
 
@@ -54,21 +54,16 @@ class IPV4AddressBox(tk.Frame):
 
         if self._current_ip[position] != new_value:
             self._current_ip[position] = new_value
-            self._emit_update()
+            self.emit_update()
 
-    def _emit_update(self, *args, **kwargs):
-        print(self.ip_address)
-        print("IP Address Changed Update, P.S. dont forget to wire it up. :)")
 
-        if self.update_callback:
-            self.update_callback(*args, **kwargs)
 
 
 def main():
     root = tk.Tk()
     root.geometry("300x100")
 
-    current_ip = "192.38.22.56".split('.')
+    current_ip = IPV4Address.from_string("192.38.22.56")
     ip_address_frame = IPV4AddressBox(root, current_ip)
     ip_address_frame.pack(fill='both', expand=True)
 
