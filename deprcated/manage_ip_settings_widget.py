@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import Toplevel, Entry, Frame, Button
 
-from containers.widgets.octet_widget import OctetWidget
+from containers.widgets.octet import Octet
 
 class IPManagementFrame(Toplevel):
     def __init__(self, parent, current_ip, update_callback=None):
@@ -84,7 +84,7 @@ class IPManagementFrame(Toplevel):
         ip_frame.grid(row=0, column=1, padx=10, pady=10, sticky='e')
 
         for i in range(4):
-            octet = OctetWidget(
+            octet = Octet(
                 ip_frame,
                 i,
                 initial_value='192',

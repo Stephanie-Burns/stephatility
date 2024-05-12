@@ -1,14 +1,17 @@
 
 import tkinter as tk
-from containers.widgets.octet_widget import OctetWidget
+
+from containers.frames.ip_address_field import IPV4AddressBox
 
 
-class IPSettingsControl(tk.Toplevel):
-    def __init__(self):
-        super().__init__()
+class IPSettingsModal(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
         self.title("IP Configuration")
-        self.geometry("350x210")
+        self.geometry("350x260")
         self.resizable(False, False)
+
+        self.selected_network = None
 
         # Main container frame
         container = tk.Frame(self)
@@ -23,7 +26,7 @@ class IPSettingsControl(tk.Toplevel):
         adapter_frame.grid_columnconfigure(2, weight=1)
 
         # Label and Entry for Ethernet Adapter
-        tk.Label(adapter_frame, text="Ethernet Adapter: ").grid(row=0, column=0, sticky='w')
+        tk.Label(adapter_frame, text="Adapter Name: ").grid(row=0, column=0, sticky='w')
         adapter_entry = tk.Entry(adapter_frame, width=20)
         adapter_entry.insert(0, "Ethernet")
         adapter_entry.grid(row=0, column=2, sticky='e')
@@ -35,8 +38,32 @@ class IPSettingsControl(tk.Toplevel):
             "Default Gateway": ["192", "168", "0", "254"]
         }
 
+        # ==========
+        # Frame to hold the radio buttons
+        radio_frame = tk.Frame(adapter_frame)
+        radio_frame.grid(row=1, column=2, sticky="ew", pady=(5, 10))
+
+        tk.Label(adapter_frame, text="Adapter Type: ").grid(row=1, column=0, sticky='w')
+
+        # Configure the frame's column weights to ensure it expands fully
+        radio_frame.grid_columnconfigure(0, weight=1)
+        radio_frame.grid_columnconfigure(1, weight=1)
+
+        # Variable to hold the selected value
+        self.selected_network = tk.StringVar(value="Ethernet")  # Default to 'Ethernet'
+
+        # Create radio buttons for network type selection
+        ethernet_radio = tk.Radiobutton(radio_frame, text="Ethernet", variable=self.selected_network, value="Ethernet")
+        wifi_radio = tk.Radiobutton(radio_frame, text="WiFi", variable=self.selected_network, value="WiFi")
+
+        # Position the radio buttons side by side within the frame
+        ethernet_radio.grid(row=0, column=0, sticky="ew")
+        wifi_radio.grid(row=0, column=1, sticky="ew")
+
+        # ==========
+
         # Create rows of labels and octet entries
-        for i, (label_text, octets) in enumerate(data.items(), start=1):
+        for i, (label_text, octets) in enumerate(data.items(), start=2):
             row_frame = tk.Frame(container)
             row_frame.grid(row=i, column=0, sticky='ew')
             container.grid_columnconfigure(0, weight=1)
@@ -50,17 +77,8 @@ class IPSettingsControl(tk.Toplevel):
             label = tk.Label(row_frame, text=label_text)
             label.grid(row=0, column=0, sticky='w')
 
-            # Octet entries on the right
-            octet_frame = tk.Frame(row_frame)
-            octet_frame.grid(row=0, column=2, pady=5, sticky='e')
-
-            for octet_position, octet_values in enumerate(octets):
-                octet_widget = OctetWidget(octet_frame, octet_position, octet_values, update_callback=None)
-                octet_widget.pack(side=tk.LEFT)
-
-                if octet_position < 3:
-                    dot_label = tk.Label(octet_frame, text=".")
-                    dot_label.pack(side=tk.LEFT, padx=3)
+            address_box = IPV4AddressBox(row_frame, octets)
+            address_box.grid(row=0, column=2, padx=(10, 0), pady=5, sticky='e')
 
         # Bottom frame for buttons
         button_frame = tk.Frame(container)
@@ -68,11 +86,11 @@ class IPSettingsControl(tk.Toplevel):
         container.grid_columnconfigure(0, weight=1)
 
         # Buttons: Enter and Center
-        cancel_button = tk.Button(button_frame, text="Enter", command=self.cancel_action)
-        cancel_button.grid(row=0, column=0, sticky='ew', padx=(0, 10))
+        cancel_button = tk.Button(button_frame, text="Cancel", command=self.cancel_action)
+        cancel_button.grid(row=0, column=0, sticky='ew', padx=(0, 10), pady=(10, 10))
 
-        enter_button = tk.Button(button_frame, text="Center", command=self.enter_action)
-        enter_button.grid(row=0, column=1, sticky='ew', padx=(10, 0))
+        enter_button = tk.Button(button_frame, text="Apply", command=self.enter_action)
+        enter_button.grid(row=0, column=1, sticky='ew', padx=(10, 0), pady=(10, 10))
 
         # Ensure buttons fill their space
         button_frame.grid_columnconfigure(0, weight=1)
@@ -88,6 +106,7 @@ class IPSettingsControl(tk.Toplevel):
         print("Center button clicked")
         self.destroy()
 
+
 if __name__ == "__main__":
-    app = IPSettingsControl()
+    app = IPSettingsModal()
     app.mainloop()
