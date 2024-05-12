@@ -11,7 +11,6 @@ class DirectoryCleaner(tk.Frame):
         super().__init__(parent, **kwargs)
 
         # Frame - Directory Cleaner
-        self.parent = parent
         self.grid(sticky='ew', padx=10, pady=10)
         self.grid_columnconfigure(0, weight=3)
         self.grid_columnconfigure(1, weight=1)

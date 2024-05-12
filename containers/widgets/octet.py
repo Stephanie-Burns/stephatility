@@ -3,9 +3,10 @@ import tkinter as tk
 from typing import Callable, Optional
 
 from containers import enums
+from mixins import CallbackMixin
 
 
-class Octet(tk.Entry):
+class Octet(CallbackMixin, tk.Entry):
     """A widget representing a single octet (byte) of an IP address.
 
     An octet is an 8-bit field, which holds values from 1 to 254 in this context, as required for a valid IPv4 address.
@@ -43,7 +44,7 @@ class Octet(tk.Entry):
             **kwargs
     ):
         # Widget Setup
-        super().__init__(parent, width=3, justify='center', **kwargs)
+        super().__init__(update_callback, parent, width=3, justify='center', **kwargs)
         self.insert(0, initial_value)
 
         #  Public Attributes
@@ -85,10 +86,8 @@ class Octet(tk.Entry):
             if int(new_value) > 255:
                 return False
 
-            # self.after_idle(lambda: self._emit_update(self.position, new_value))
             return True
 
-        # self.after_idle(lambda: self._emit_update(self.position, new_value))
         return True  # Always allow deletion
 
     def _octet_value_threshold_reached(self) -> bool:
@@ -104,14 +103,14 @@ class Octet(tk.Entry):
         Returns:
             bool: True if the octet meets the completion criteria, otherwise False.
         """
-        value = self.get()
-        if value:
+        display_value = self.get()
+        if display_value:
 
-            if value == "255" or value == "0":
+            if display_value == "255" or display_value == "0":
                 return True
-            elif len(value) == 2 and 26 <= int(value) <= 99:
+            elif len(display_value) == 2 and 26 <= int(display_value) <= 99:
                 return True
-            elif len(value) == 3 and 100 <= int(value) < 255:
+            elif len(display_value) == 3 and 100 <= int(display_value) < 255:
                 return True
 
         return False
@@ -141,6 +140,11 @@ class Octet(tk.Entry):
 
     def _on_key_release(self, event: tk.Event) -> None:
         """Actions to preform when a key is released."""
+        display_value = self.get()
+
+        if display_value and display_value != self.previous_valid_content:
+            self.emit_update(self.position, display_value)
+
         if self._octet_value_threshold_reached():
             self.after_idle(self._modify_focus)
 
@@ -155,18 +159,12 @@ class Octet(tk.Entry):
         """Restore previous content if no valid entry is made."""
         if not self.get():
             self.insert(0, self.previous_valid_content)
-        print(self.get())
-        self.after_idle(lambda: self._emit_update(self.position, self.get()))
 
     def _modify_focus(self, reverse: bool = False) -> None:
         """Change focus to the next or previous widget based on the direction."""
         self.focus_travel_direction = -1 if reverse else 1
         next_widget = self.tk_focusPrev() if reverse else self.tk_focusNext()
         next_widget.focus_set()
-
-    def _emit_update(self, *args, **kwargs):
-        if self.update_callback:
-            self.update_callback(*args, **kwargs)
 
 
 def main():

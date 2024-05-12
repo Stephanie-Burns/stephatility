@@ -2,11 +2,13 @@
 import tkinter as tk
 
 from containers.frames.ip_address_field import IPV4AddressBox
+from engine.ipv4_network_management import IPV4Address
+from mixins import CallbackMixin
 
 
-class IPSettingsModal(tk.Toplevel):
-    def __init__(self, parent):
-        super().__init__(parent)
+class IPSettingsModal(CallbackMixin, tk.Toplevel):
+    def __init__(self, parent, update_callback=None, **kwargs):
+        super().__init__(update_callback, parent, **kwargs)
         self.title("IP Configuration")
         self.geometry("350x260")
         self.resizable(False, False)
@@ -33,9 +35,9 @@ class IPSettingsModal(tk.Toplevel):
 
         # Data for labels and octets
         data = {
-            "IP Address": ["192", "168", "0", "1"],
-            "Subnet Mask": ["255", "255", "255", "0"],
-            "Default Gateway": ["192", "168", "0", "254"]
+            "IP Address"        : IPV4Address.from_string('192.168.0.100'),
+            "Subnet Mask"       : IPV4Address.from_string('255.255.255.0'),
+            "Default Gateway"   : IPV4Address.from_string('192.168.0.1'),
         }
 
         # ==========
@@ -62,8 +64,8 @@ class IPSettingsModal(tk.Toplevel):
 
         # ==========
 
-        # Create rows of labels and octet entries
-        for i, (label_text, octets) in enumerate(data.items(), start=2):
+        # Create labels and ip fields
+        for i, (label_text, ip_address) in enumerate(data.items(), start=2):
             row_frame = tk.Frame(container)
             row_frame.grid(row=i, column=0, sticky='ew')
             container.grid_columnconfigure(0, weight=1)
@@ -77,7 +79,7 @@ class IPSettingsModal(tk.Toplevel):
             label = tk.Label(row_frame, text=label_text)
             label.grid(row=0, column=0, sticky='w')
 
-            address_box = IPV4AddressBox(row_frame, octets)
+            address_box = IPV4AddressBox(row_frame, ip_address)
             address_box.grid(row=0, column=2, padx=(10, 0), pady=5, sticky='e')
 
         # Bottom frame for buttons
@@ -89,24 +91,35 @@ class IPSettingsModal(tk.Toplevel):
         cancel_button = tk.Button(button_frame, text="Cancel", command=self.cancel_action)
         cancel_button.grid(row=0, column=0, sticky='ew', padx=(0, 10), pady=(10, 10))
 
-        enter_button = tk.Button(button_frame, text="Apply", command=self.enter_action)
+        enter_button = tk.Button(button_frame, text="Apply", command=self.apply_action)
         enter_button.grid(row=0, column=1, sticky='ew', padx=(10, 0), pady=(10, 10))
 
         # Ensure buttons fill their space
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
 
-    def enter_action(self):
-        # Placeholder for whatever action the Enter button should do
-        print("Enter button clicked")
+    def apply_action(self):
+        print("Apply button clicked")
+        self.emit_update()
         self.destroy()
 
     def cancel_action(self):
-        # Placeholder for whatever action the Center button should do
-        print("Center button clicked")
+        print("Cancel button clicked")
         self.destroy()
 
 
 if __name__ == "__main__":
-    app = IPSettingsModal()
-    app.mainloop()
+    def open_modal():
+        modal = IPSettingsModal(root)
+        modal.transient(root)
+        modal.grab_set()
+
+    root = tk.Tk()
+    root.title("Main Application Window")
+    root.geometry("600x400")
+
+    # Button to open the modal
+    open_button = tk.Button(root, text="Open IP Settings", command=open_modal)
+    open_button.pack(pady=20)
+
+    root.mainloop()
