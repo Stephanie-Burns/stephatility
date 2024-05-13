@@ -4,10 +4,10 @@ import tkinter as tk
 
 from gui.containers.toplevel.ip_settings_modal import IPSettingsModal
 from gui.containers.frames.ip_address_field import IPV4AddressBox
-from engine.ipv4_network_management import IPV4Address
+from network_tools.ipv4_address import IPV4Address
 
 class IPManager(tk.Frame):
-    def __init__(self, parent: tk.Widget, current_ip: IPV4Address, **kwargs):
+    def __init__(self, parent: tk.Widget, current_ip: IPV4Address, network_service, **kwargs):
         super().__init__(parent, **kwargs)
 
         # Frame - IPManager
@@ -19,11 +19,14 @@ class IPManager(tk.Frame):
 
         self.management_frame = None
         self.last_set_ipv4_address = copy.deepcopy(current_ip)
+        self.current_ip = current_ip
+        self.network_service = network_service
+        self.network_config = None  # TODO get from service later
 
         self.label = tk.Label(self, text="IP Address:")
         self.label.grid(row=0, column=0, padx=10, pady=10, sticky='W')
 
-        self.ip_frame = IPV4AddressBox(self, current_ip, self._update_set_button_state)
+        self.ip_frame = IPV4AddressBox(self, current_ip, self._check_apply_button_state)
         self.ip_frame.grid(row=0, column=1, padx=(10, 20), pady=10, sticky='E')
 
         self.set_button = tk.Button(self, text="Apply", command=self._set_ip_address, width=20)
@@ -32,11 +35,11 @@ class IPManager(tk.Frame):
         self.manage_button = tk.Button(self, text="Manage", command=self._launch_manage_ip_modal, width=20)
         self.manage_button.grid(row=0, column=3, padx=10, pady=10, sticky='EW')
 
-        self._update_set_button_state()       # Initial check
+        self._check_apply_button_state()       # Initial check
 
 
 
-    def _update_set_button_state(self) -> None:
+    def _check_apply_button_state(self) -> None:
         if self.ip_frame.ip_address == self.last_set_ipv4_address:
             self.set_button.config(state='disabled')
         else:
@@ -47,18 +50,24 @@ class IPManager(tk.Frame):
     def _set_ip_address(self):
         print(f'Changing addr: {self.last_set_ipv4_address=}, to: {self.ip_frame.ip_address=}')
         self.last_set_ipv4_address = copy.deepcopy(self.ip_frame.ip_address)
-        self._update_set_button_state()
-        # Backend logic
+        self._check_apply_button_state()
 
-    def update_ip_settings(self):
-        # Optional: Callback method to handle any updates needed when management frame closes
+        # Backend logic
+        # set with defaults if config is blank
+        self.network_service.apply_configuration(self.network_config)
+
+    def _callback_ip_settings_changed(self):
+
+        self.last_set_ipv4_address = copy.deepcopy(self.current_ip)
+        self._check_apply_button_state()
+
         print("IP Settings potentially updated")
 
     def _launch_manage_ip_modal(self):
         print("IP Settings management invoked")
 
         if not self.management_frame or not self.management_frame.winfo_exists():
-            self.management_frame = IPSettingsModal(self)
+            self.management_frame = IPSettingsModal(self, self._callback_ip_settings_changed)
             self.management_frame.transient(self)
             self.management_frame.grab_set()
 

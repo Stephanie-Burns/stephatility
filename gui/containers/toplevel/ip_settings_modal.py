@@ -2,18 +2,25 @@
 import tkinter as tk
 
 from gui.containers.frames.ip_address_field import IPV4AddressBox
-from engine.ipv4_network_management import IPV4Address
-from mixins import CallbackMixin
+from network_tools.ipv4_address import IPV4Address
+from gui.mixins import CallbackMixin
 
 
 class IPSettingsModal(CallbackMixin, tk.Toplevel):
-    def __init__(self, parent, update_callback=None, **kwargs):
+    def __init__(self, parent, current_ip, update_callback=None, **kwargs):
         super().__init__(update_callback, parent, **kwargs)
         self.title("IP Configuration")
         self.geometry("350x260")
         self.resizable(False, False)
 
         self.selected_network = None
+        self.ip_address_field = current_ip
+
+        self.network_configuration = {
+            "IP Address": IPV4Address.from_string('192.168.0.100'),
+            "Subnet Mask": IPV4Address.from_string('255.255.255.0'),
+            "Default Gateway": IPV4Address.from_string('192.168.0.1'),
+        }
 
         # Main container frame
         container = tk.Frame(self)

@@ -1,68 +1,11 @@
 
-from typing import NamedTuple, Pattern
+from typing import Pattern
 import os
 import re
 import subprocess
-from dataclasses import dataclass, field
-from typing import List, Iterable
-
-from engine.enums import AdapterType
 
 
-@dataclass
-class IPV4Address:
-    octets: List[str] = field(default_factory=list)
-
-    def __post_init__(self):
-        self.validate_octets(self.octets)
-
-    def __str__(self) -> str:
-        return ".".join(self.octets)
-
-    def __getitem__(self, key: int) -> str:
-        return self.octets[key]
-
-    def __setitem__(self, key: int, value: str) -> None:
-        self.validate_octet(value)
-        self.octets[key] = value
-
-    def __len__(self) -> int:
-        return len(self.octets)
-
-    def __iter__(self) -> Iterable[str]:
-        return iter(self.octets)
-
-    @staticmethod
-    def validate_octet(octet: str) -> None:
-        if not 0 <= int(octet) <= 255:
-            raise ValueError(f"IP address octet {octet} must be between 0 and 255.")
-
-    @classmethod
-    def validate_octets(cls, octets: List[str]) -> None:
-        for octet in octets:
-            cls.validate_octet(octet)  # Reuse validation logic for consistency
-
-    @classmethod
-    def from_string(cls, ip_str: str) -> 'IPV4Address':
-        """Create an IPAddress instance from a string."""
-        return cls(ip_str.split('.'))
-
-    @staticmethod
-    def is_valid_subnet_mask(mask: 'IPV4Address') -> bool:
-        # Convert to a single string of bits
-        bit_sequence = ''.join(f"{int(octet):08b}" for octet in mask.octets)
-        # Check if the bit sequence is a valid mask (ones followed by zeros)
-        if '01' in bit_sequence:
-            return False
-        return True
-
-
-class NetworkConfig(NamedTuple):
-    adapter_prefix  : AdapterType
-    adapter_name    : str
-    ipv4_address    : IPV4Address
-    subnet_mask     : IPV4Address
-    default_gateway : IPV4Address
+from network_tools import AdapterType, IPV4Address, NetworkConfig
 
 
 class IPV4AddressConfiguration:
@@ -87,7 +30,7 @@ class IPV4AddressConfiguration:
         adapter_match = adapter_regex.search(cls.fetch_ipconfig_output())
         if not adapter_match:
 
-            return NetworkConfig(adapter_prefix, interface_name, IPV4Address.from_string('0.0.0.0'), IPV4Address.from_string('255.255.255.255'), IPV4Address.from_string('0.0.0.0'))
+            return NetworkConfig()
 
         adapter_block = adapter_match.group(1)
 
@@ -110,10 +53,10 @@ class IPV4AddressConfiguration:
         return result.stdout
 
     @staticmethod
-    def apply_configuration(interface: str, ip: str, subnet: str, gateway: str) -> None:
+    def apply_configuration(config: NetworkConfig) -> None:
         """Throws exceptions if the interface cannot be configured."""
         bat_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'quick_winip.bat'))
-        args = f'"{interface}", "{ip}", "{subnet}", "{gateway}"'
+        args = f'"{config.adapter_name}", "{config.ipv4_address}", "{config.subnet_mask}", "{config.default_gateway}"'
         ps_command = f'Powershell -Command "Start-Process \'{bat_file_path}\' -ArgumentList {args} -Verb RunAs"'
         subprocess.check_output(ps_command, shell=True)
 

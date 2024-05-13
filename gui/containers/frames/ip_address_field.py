@@ -4,8 +4,8 @@ import tkinter as tk
 from typing import Callable, Optional
 
 from gui.containers.widgets.octet import Octet
-from engine.ipv4_network_management import IPV4Address
-from mixins import CallbackMixin
+from network_tools.ipv4_address import IPV4Address
+from gui.mixins import CallbackMixin
 
 
 class IPV4AddressBox(CallbackMixin, tk.Frame):
@@ -46,6 +46,10 @@ class IPV4AddressBox(CallbackMixin, tk.Frame):
     def ip_address(self) -> IPV4Address:
         """Property to get the current IP address as a formatted string."""
         return self._current_ip
+
+    @ip_address.setter
+    def ip_address(self, ip_address: IPV4Address) -> None:
+        self._current_ip = ip_address
 
     def _on_octet_change(self, position: int, new_value: str) -> None:
 
