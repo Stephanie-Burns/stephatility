@@ -4,8 +4,9 @@ import os
 import re
 import subprocess
 
-
-from network_tools import AdapterType, IPV4Address, NetworkConfig
+from network_tools.enums import AdapterType
+from network_tools.ipv4_address import IPV4Address
+from network_tools.network_config import NetworkConfig
 
 
 class IPV4AddressConfiguration:

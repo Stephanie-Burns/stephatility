@@ -1,7 +1,8 @@
 
 from typing import NamedTuple, Tuple
 
-from network_tools import AdapterType, NetworkConfig
+from network_tools.enums import AdapterType
+from network_tools.network_config import NetworkConfig
 
 
 class NetworkService:
