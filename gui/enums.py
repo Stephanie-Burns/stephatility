@@ -19,8 +19,8 @@ class KeySym(StrEnum):
     Enumeration of common TkInter keyboard symbols.
     Detailed map at: https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/key-names.html
     """
-    Return = "Return"
+    RETURN = "Return"
     KP_Enter = "KP_Enter"
-    Tab = "Tab"
+    TAB = "Tab"
     ISO_Left_Tab = "ISO_Left_Tab"
-    Period = "."
+    PERIOD = "."

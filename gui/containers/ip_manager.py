@@ -6,6 +6,7 @@ from gui.containers.toplevel.ip_settings_modal import IPSettingsModal
 from gui.containers.frames.ip_address_field import IPV4AddressBox
 from network_tools.ipv4_address import IPV4Address
 
+
 class IPManager(tk.Frame):
     def __init__(self, parent: tk.Widget, current_ip: IPV4Address, network_service, **kwargs):
         super().__init__(parent, **kwargs)

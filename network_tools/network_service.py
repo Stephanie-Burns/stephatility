@@ -16,11 +16,7 @@ class NetworkService:
         self.configuration_manager = configuration_manager
         self.network_config = NetworkConfig()
 
-    def get_network_configuration(
-            self,
-            adapter_type    : AdapterType = AdapterType.ETHERNET,
-            interface_name  : str = 'Ethernet'
-    ) -> NetworkConfig:
+    def get_network_configuration(self) -> NetworkConfig:
         """
         Retrieves the network configuration for a specific network adapter identified by type and name.
 
@@ -36,7 +32,7 @@ class NetworkService:
             Exception: Propagates exceptions that might be raised during the configuration fetching process.
         """
 
-        backend_config_data = self.configuration_manager.get_configuration(adapter_type, interface_name)
+        backend_config_data = self.configuration_manager.get_configuration(self.network_config.adapter_prefix,  self.network_config.adapter_name)
         self.network_config.update_configuration(backend_config_data)
 
         return self.network_config
@@ -61,21 +57,17 @@ class NetworkService:
         except Exception as e:
             return 1, str(e)
 
+
 if __name__ == "__main__":
     # Example usage
     from ipv4_addrress_configuration import IPV4AddressConfiguration
     manager = IPV4AddressConfiguration()
     service = NetworkService(manager)
-    service.get_network_configuration(AdapterType.ETHERNET, "Ethernet")
-    service.get_network_configuration(AdapterType.WIFI, "Wi-Fi 2")
+
+    service.network_config.ipv4_address.update_from_string("192.168.1.37")
     service.apply_configuration("Ethernet", "192.168.1.37", "255.255.255.0", "192.168.1.1")
+    service.get_network_configuration()
 
-
-
-# service takes cinfig
-# pings the adaptor name for signal, reads output, confirms that the change is indeed differnt,
-# then it sets the ip
-
-# Network should default to ehternet if it reads default config version
-# ping adapter and if sucess fill data otherwise load default data in disabled set state
-# user enters adapter name and pings for creds, sucess updates networkconfig, app config and gui
+    # Deprecated
+    # service.get_network_configuration(AdapterType.ETHERNET, "Ethernet")
+    # service.get_network_configuration(AdapterType.WIFI, "Wi-Fi 2")

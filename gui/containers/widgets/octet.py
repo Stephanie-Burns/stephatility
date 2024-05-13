@@ -68,7 +68,8 @@ class Octet(CallbackMixin, tk.Entry):
 
         self.bind("<Shift-Return>", self._on_shift_key_press)
         self.bind("<Shift-KP_Enter>", self._on_shift_key_press)
-        self.bind("<ISO_Left_Tab>", self._on_shift_key_press)
+        self.bind("<Shift-Tab>", self._on_shift_key_press)
+        # self.bind("<ISO_Left_Tab>", self._on_shift_key_press) # Upsetting windows
 
     @staticmethod
     def _validate_input(new_value: str, char: str, action: str) -> bool:
@@ -118,10 +119,10 @@ class Octet(CallbackMixin, tk.Entry):
     def _on_key_press(self, event: tk.Event) -> str:
         """Handle key press for special navigation and auto-advance without Shift key."""
         if event.keysym in (
-                enums.KeySym.Return,
+                enums.KeySym.RETURN,
                 enums.KeySym.KP_Enter,
-                enums.KeySym.Tab
-        ) or event.char == enums.KeySym.Period:
+                enums.KeySym.TAB
+        ) or event.char == enums.KeySym.PERIOD:
             self._modify_focus()
             return enums.EventAction.BREAK
 
@@ -129,7 +130,7 @@ class Octet(CallbackMixin, tk.Entry):
         """Handle shift-modified key presses for navigation."""
         first_octet = self.position == 0
 
-        if event.keysym in (enums.KeySym.Return, enums.KeySym.KP_Enter):
+        if event.keysym in (enums.KeySym.RETURN, enums.KeySym.KP_Enter, enums.KeySym.TAB):
             if not first_octet:
                 self._modify_focus(reverse=True)
             return enums.EventAction.BREAK
