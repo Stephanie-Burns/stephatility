@@ -20,10 +20,6 @@ class NetworkService:
         """
         Retrieves the network configuration for a specific network adapter identified by type and name.
 
-        Args:
-            adapter_type (AdapterType): The type of the network adapter (e.g., WIFI, ETHERNET).
-            interface_name (str): The name of the network interface.
-
         Returns:
             NamedTuple: An instance of NamedTuple containing network configuration details such as:
             IP address, subnet mask, and default gateway.
@@ -31,18 +27,12 @@ class NetworkService:
         Raises:
             Exception: Propagates exceptions that might be raised during the configuration fetching process.
         """
-
-        backend_config_data = self.configuration_manager.get_configuration(self.network_config.adapter_prefix,  self.network_config.adapter_name)
-        self.network_config.update_configuration(backend_config_data)
-
+        self.network_config.update_configuration(self.network_config)
         return self.network_config
 
-    def apply_configuration(self, config: NetworkConfig) -> Tuple[int, str]:
+    def apply_configuration(self) -> Tuple[int, str]:
         """
         Applies a new network configuration to the specified interface.
-
-        Args:
-            config (NetworkConfig): The new network configuration settings to be applied.
 
         Returns:
             Tuple[int, str]: A tuple containing a status code (0 for success, 1 for failure) and a message describing the result.
@@ -51,7 +41,7 @@ class NetworkService:
             Exception: Captures and returns any exceptions as part of the error message in the tuple.
         """
         try:
-            self.configuration_manager.apply_configuration(config)
+            self.configuration_manager.apply_configuration(self.network_config)
             # app_config.save(config.as_dict())
             return 0, "Network settings updated successfully!"
         except Exception as e:
@@ -65,9 +55,5 @@ if __name__ == "__main__":
     service = NetworkService(manager)
 
     service.network_config.ipv4_address.update_from_string("192.168.1.37")
-    service.apply_configuration("Ethernet", "192.168.1.37", "255.255.255.0", "192.168.1.1")
+    service.apply_configuration()
     service.get_network_configuration()
-
-    # Deprecated
-    # service.get_network_configuration(AdapterType.ETHERNET, "Ethernet")
-    # service.get_network_configuration(AdapterType.WIFI, "Wi-Fi 2")

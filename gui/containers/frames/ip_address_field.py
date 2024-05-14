@@ -12,21 +12,21 @@ class IPV4AddressBox(CallbackMixin, tk.Frame):
     def __init__(
             self,
             parent          : tk.Widget,
-            current_ip      : IPV4Address,
+            ip_address      : IPV4Address,
             update_callback : Optional[Callable[..., None]] = None,
             **kwargs
     ):
         super().__init__(update_callback, parent, **kwargs)
 
-        # Private Attributes
-        self._current_ip = current_ip
+        # Public Attributes
+        self.ip_address = ip_address
 
         # Frame - IPV4Address Box
         self.grid(sticky='ew', padx=10, pady=10)
 
         # Entry - Octet
         for i in range(4):
-            initial_value = self._current_ip[i]
+            initial_value = self.ip_address[i]
             octet = Octet(
                 self,
                 i,
@@ -42,25 +42,14 @@ class IPV4AddressBox(CallbackMixin, tk.Frame):
                 dot_label.grid(column=2 * i + 1, row=0, padx=3)
                 self.grid_columnconfigure(2 * i + 1, weight=0)
 
-    @property
-    def ip_address(self) -> IPV4Address:
-        """Property to get the current IP address as a formatted string."""
-        return self._current_ip
-
-    @ip_address.setter
-    def ip_address(self, ip_address: IPV4Address) -> None:
-        self._current_ip = ip_address
-
     def _on_octet_change(self, position: int, new_value: str) -> None:
 
         if position is None or new_value is None:
             return
 
-        if self._current_ip[position] != new_value:
-            self._current_ip[position] = new_value
+        if self.ip_address[position] != new_value:
+            self.ip_address[position] = new_value
             self.emit_update()
-
-
 
 
 def main():

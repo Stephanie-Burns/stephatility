@@ -22,5 +22,4 @@ class KeySym(StrEnum):
     RETURN = "Return"
     KP_Enter = "KP_Enter"
     TAB = "Tab"
-    ISO_Left_Tab = "ISO_Left_Tab"
     PERIOD = "."

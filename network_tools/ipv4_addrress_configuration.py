@@ -14,25 +14,38 @@ class IPV4AddressConfiguration:
     _subnet_regex   :Pattern[str] = re.compile(r"Subnet Mask[ .:]+([\d.]+)")
     _gateway_regex  :Pattern[str] = re.compile(r"Default Gateway[ .:]+(?:.*?([\d.]+)\s*(?:%[\d]+)?\s*)+$", re.MULTILINE)
 
-    @classmethod
-    def fetch_adapter_block(cls, adapter_name: str) -> Optional[str]:
+
+    @staticmethod
+    def apply_configuration(config: NetworkConfig) -> None:
         """
-        Fetches the network configuration block from the system's IP configuration output for a specific adapter.
+        Applies the given network configuration using a system command, potentially requiring elevated privileges.
 
         Args:
-            adapter_name (str): The name of the network adapter.
+            config (NetworkConfig): The configuration to apply.
 
-        Returns:
-            Optional[str]: The configuration block as a string if found, otherwise None.
+        Raises:
+            subprocess.CalledProcessError: If the command fails.
         """
-        prefix = 'Wireless LAN adapter' if adapter_name == AdapterType.WIFI else 'Ethernet adapter'
-        adapter_regex = re.compile(
-            rf"{re.escape(prefix + ' ' + adapter_name)}:\s*\n(.*?)(?=\n\n|\Z)",
-            re.DOTALL
-        )
-        output = cls.fetch_ipconfig_output()
-        match = adapter_regex.search(output)
-        return match.group(1) if match else None
+        bat_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'quick_winip.bat'))
+        args = f'"{config.adapter_name}", "{config.ipv4_address}", "{config.subnet_mask}", "{config.default_gateway}"'
+        ps_command = f'Powershell -Command "Start-Process \'{bat_file_path}\' -ArgumentList {args} -Verb RunAs"'
+        subprocess.check_output(ps_command, shell=True)
+
+    @classmethod
+    def get_configuration(cls, network_config: NetworkConfig) -> None:
+        """
+        Retrieves and updates the network configuration for a specified network adapter.
+
+        Args:
+            network_config (NetworkConfig): The network configuration object to update.
+
+        Raises:
+            ValueError: If no configuration data is found for the adapter.
+        """
+        adapter_block = cls.fetch_adapter_block(network_config.adapter_name)
+        if not adapter_block:
+            raise ValueError(f"No data found for adapter {network_config.adapter_name}")
+        cls.extract_ip_details(adapter_block, network_config)
 
     @classmethod
     def extract_ip_details(cls, adapter_block: str, network_config: NetworkConfig) -> None:
@@ -55,20 +68,24 @@ class IPV4AddressConfiguration:
             network_config.default_gateway.update_from_string(default_gateway.group(1))
 
     @classmethod
-    def get_configuration(cls, network_config: NetworkConfig) -> None:
+    def fetch_adapter_block(cls, adapter_name: str) -> Optional[str]:
         """
-        Retrieves and updates the network configuration for a specified network adapter.
+        Fetches the network configuration block from the system's IP configuration output for a specific adapter.
 
         Args:
-            network_config (NetworkConfig): The network configuration object to update.
+            adapter_name (str): The name of the network adapter.
 
-        Raises:
-            ValueError: If no configuration data is found for the adapter.
+        Returns:
+            Optional[str]: The configuration block as a string if found, otherwise None.
         """
-        adapter_block = cls.fetch_adapter_block(network_config.adapter_name)
-        if not adapter_block:
-            raise ValueError(f"No data found for adapter {network_config.adapter_name}")
-        cls.extract_ip_details(adapter_block, network_config)
+        prefix = 'Wireless LAN adapter' if adapter_name == AdapterType.WIFI else 'Ethernet adapter'
+        adapter_regex = re.compile(
+            rf"{re.escape(prefix + ' ' + adapter_name)}:\s*\n(.*?)(?=\n\n|\Z)",
+            re.DOTALL
+        )
+        output = cls.fetch_ipconfig_output()
+        match = adapter_regex.search(output)
+        return match.group(1) if match else None
 
     @staticmethod
     def fetch_ipconfig_output() -> str:
@@ -81,23 +98,11 @@ class IPV4AddressConfiguration:
         result = subprocess.run(["ipconfig"], capture_output=True, text=True)
         return result.stdout
 
-    @staticmethod
-    def apply_configuration(config: NetworkConfig) -> None:
-        """
-        Applies the given network configuration using a system command, potentially requiring elevated privileges.
 
-        Args:
-            config (NetworkConfig): The configuration to apply.
 
-        Raises:
-            subprocess.CalledProcessError: If the command fails.
-        """
-        bat_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'quick_winip.bat'))
-        args = f'"{config.adapter_name}", "{config.ipv4_address}", "{config.subnet_mask}", "{config.default_gateway}"'
-        ps_command = f'Powershell -Command "Start-Process \'{bat_file_path}\' -ArgumentList {args} -Verb RunAs"'
-        subprocess.check_output(ps_command, shell=True)
+
+
 
 
 if __name__ == "__main__":
     ...
-

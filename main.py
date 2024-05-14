@@ -11,6 +11,7 @@ class UtilApp(tk.Frame):
 
         self.current_ip = IPV4Address.from_string("0.0.0.0")  # get from config or service
         self.network_service = NetworkService(IPV4AddressConfiguration())
+        self.network_service.get_network_configuration()
 
         for i in range(4):
             self.grid_columnconfigure(i, weight=1)
@@ -25,7 +26,7 @@ class UtilApp(tk.Frame):
         self.tempfile_gen = TempFileGenerator(self)
         self.tempfile_gen.grid(row=2, column=0, columnspan=4, sticky='ew', padx=5, pady=5)
 
-        self.ip_manager = IPManager(self, self.current_ip, self.network_service)
+        self.ip_manager = IPManager(self, self.network_service)
         self.ip_manager.grid(row=3, column=0, columnspan=4, sticky='ew', padx=5, pady=5)
 
 

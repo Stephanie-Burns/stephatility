@@ -69,7 +69,6 @@ class Octet(CallbackMixin, tk.Entry):
         self.bind("<Shift-Return>", self._on_shift_key_press)
         self.bind("<Shift-KP_Enter>", self._on_shift_key_press)
         self.bind("<Shift-Tab>", self._on_shift_key_press)
-        # self.bind("<ISO_Left_Tab>", self._on_shift_key_press) # Upsetting windows
 
     @staticmethod
     def _validate_input(new_value: str, char: str, action: str) -> bool:
@@ -135,7 +134,7 @@ class Octet(CallbackMixin, tk.Entry):
                 self._modify_focus(reverse=True)
             return enums.EventAction.BREAK
 
-        elif event.keysym == enums.KeySym.ISO_Left_Tab:
+        elif event.keysym == enums.KeySym.TAB:
             self._modify_focus(reverse=True)
             return enums.EventAction.BREAK
 

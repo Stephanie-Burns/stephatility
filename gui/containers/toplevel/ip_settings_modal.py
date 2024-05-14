@@ -2,19 +2,20 @@
 import tkinter as tk
 
 from gui.containers.frames.ip_address_field import IPV4AddressBox
-from network_tools.ipv4_address import IPV4Address
 from gui.mixins import CallbackMixin
+from network_tools.ipv4_address import IPV4Address
+from network_tools.network_service import NetworkService
 
 
 class IPSettingsModal(CallbackMixin, tk.Toplevel):
-    def __init__(self, parent, current_ip, update_callback=None, **kwargs):
+    def __init__(self, parent, network_service: NetworkService, update_callback=None, **kwargs):
         super().__init__(update_callback, parent, **kwargs)
         self.title("IP Configuration")
         self.geometry("350x260")
         self.resizable(False, False)
 
+        self.network_service = network_service
         self.selected_network = None
-        self.ip_address_field = current_ip
 
         self.network_configuration = {
             "IP Address": IPV4Address.from_string('192.168.0.100'),
@@ -41,11 +42,12 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
         adapter_entry.grid(row=0, column=2, sticky='e')
 
         # Data for labels and octets
-        data = {
-            "IP Address"        : IPV4Address.from_string('192.168.0.100'),
-            "Subnet Mask"       : IPV4Address.from_string('255.255.255.0'),
-            "Default Gateway"   : IPV4Address.from_string('192.168.0.1'),
-        }
+        labels = ("IP Address", "Subnet Mask", "Default Gateway")
+        addrs = (
+            self.network_service.network_config.ipv4_address,
+            self.network_service.network_config.subnet_mask,
+            self.network_service.network_config.default_gateway
+        )
 
         # ==========
         # Frame to hold the radio buttons
@@ -69,9 +71,15 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
         ethernet_radio.grid(row=0, column=0, sticky="ew")
         wifi_radio.grid(row=0, column=1, sticky="ew")
 
-        # ==========
+        # ============
 
         # Create labels and ip fields
+        data = {
+            "IP Address"        : self.network_service.network_config.ipv4_address,
+            "Subnet Mask"       : self.network_service.network_config.subnet_mask,
+            "Default Gateway"   : self.network_service.network_config.default_gateway
+        }
+
         for i, (label_text, ip_address) in enumerate(data.items(), start=2):
             row_frame = tk.Frame(container)
             row_frame.grid(row=i, column=0, sticky='ew')
@@ -86,7 +94,7 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
             label = tk.Label(row_frame, text=label_text)
             label.grid(row=0, column=0, sticky='w')
 
-            address_box = IPV4AddressBox(row_frame, ip_address)
+            address_box = IPV4AddressBox(row_frame, ip_address, update_callback=self._check_apply_button_state)
             address_box.grid(row=0, column=2, padx=(10, 0), pady=5, sticky='e')
 
         # Bottom frame for buttons
@@ -98,26 +106,40 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
         cancel_button = tk.Button(button_frame, text="Cancel", command=self.cancel_action)
         cancel_button.grid(row=0, column=0, sticky='ew', padx=(0, 10), pady=(10, 10))
 
-        enter_button = tk.Button(button_frame, text="Apply", command=self.apply_action)
-        enter_button.grid(row=0, column=1, sticky='ew', padx=(10, 0), pady=(10, 10))
+        self.apply_button = tk.Button(button_frame, text="Apply", command=self.apply_action)
+        self.apply_button.grid(row=0, column=1, sticky='ew', padx=(10, 0), pady=(10, 10))
 
         # Ensure buttons fill their space
         button_frame.grid_columnconfigure(0, weight=1)
         button_frame.grid_columnconfigure(1, weight=1)
 
+        self._check_apply_button_state()
+
     def apply_action(self):
-        print("Apply button clicked")
+        print("IP settings Modal: Apply button clicked")
+
+        self.network_service.apply_configuration()
+        self.network_service.network_config.reset_baseline()
         self.emit_update()
+        self._check_apply_button_state()
         self.destroy()
 
+    def _check_apply_button_state(self) -> None:
+        if self.network_service.network_config.has_changed():
+            self.apply_button.config(state='normal')
+        else:
+            self.apply_button.config(state='disabled')
+
     def cancel_action(self):
-        print("Cancel button clicked")
+        print("IP settings Modal: Cancel button clicked")
+        print(self.network_service.network_config)
         self.destroy()
 
 
 if __name__ == "__main__":
     def open_modal():
-        modal = IPSettingsModal(root)
+        from network_tools.ipv4_addrress_configuration import IPV4AddressConfiguration
+        modal = IPSettingsModal(root, NetworkService(IPV4AddressConfiguration))
         modal.transient(root)
         modal.grab_set()
 
