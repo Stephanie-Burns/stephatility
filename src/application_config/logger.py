@@ -1,14 +1,17 @@
 
 import logging
+from pathlib import Path
 
 
 def configure_logger(
         name,
         log_to_console=True,
         log_to_file=False,
-        file_path='app.log',
+        file_path='logs/app.log',
         level=logging.INFO
 ):
+    absolute_file_path = Path(file_path).resolve()
+
     logger = logging.getLogger(name)
     logger.setLevel(level)
     logger.propagate = False
@@ -16,7 +19,6 @@ def configure_logger(
     if logger.hasHandlers():
         logger.handlers.clear()
 
-    # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     formatter = logging.Formatter(
         '%(asctime)s - %(levelname)-8s | %(module)s - %(funcName)s - %(message)s',
                       datefmt='%Y-%m-%d %H:%M:%S'
@@ -30,7 +32,7 @@ def configure_logger(
 
     # File logging setup
     if log_to_file:
-        file_handler = logging.FileHandler(file_path)
+        file_handler = logging.FileHandler(absolute_file_path)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 

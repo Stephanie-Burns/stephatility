@@ -1,5 +1,6 @@
 import tkinter as tk
 
+from src.application_config import logger
 from src.gui.containers.toplevel.ip_settings_modal import IPSettingsModal
 from src.gui.containers.frames.ip_address_field import IPV4AddressBox
 from src.network_tools import NetworkService
@@ -51,8 +52,6 @@ class IPManager(tk.Frame):
         else:
             self.apply_button.config(state='disabled')
 
-# ======================
-
     def _set_ip_address(self):
         previous_address = self.network_service.network_config.previous_config.get('ipv4_address')
         current_address = self.network_service.network_config.ipv4_address
@@ -67,19 +66,10 @@ class IPManager(tk.Frame):
         print("IP Address changed from modal")
 
     def _launch_manage_ip_modal(self):
-        print("IP Settings management invoked")
-
         if not self.modal_ip_settings or not self.modal_ip_settings.winfo_exists():
             self.modal_ip_settings = IPSettingsModal(self, self.network_service, self._callback_ip_settings_changed)
             self.modal_ip_settings.transient(self)
             self.modal_ip_settings.grab_set()
-
-    def on_management_frame_close(self):
-        # Properly handle the close operation
-        print("Management frame has been closed")
-        if self.modal_ip_settings.winfo_exists():
-            self.modal_ip_settings.destroy()
-        self.modal_ip_settings = None
 
 
 def main():
