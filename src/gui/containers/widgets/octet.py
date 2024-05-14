@@ -2,8 +2,8 @@
 import tkinter as tk
 from typing import Callable, Optional
 
-from gui import enums
-from gui.mixins import CallbackMixin
+from src.gui import enums
+from src.gui.mixins import CallbackMixin
 
 
 class Octet(CallbackMixin, tk.Entry):

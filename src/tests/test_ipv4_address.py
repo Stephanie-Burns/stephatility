@@ -1,6 +1,6 @@
 import unittest
 
-from network_tools import IPV4Address
+from src.network_tools import IPV4Address
 
 
 class TestIPV4Address(unittest.TestCase):

@@ -3,9 +3,9 @@ import tkinter as tk
 
 from typing import Callable, Optional
 
-from gui.containers.widgets.octet import Octet
-from network_tools.ipv4_address import IPV4Address
-from gui.mixins import CallbackMixin
+from src.gui.containers.widgets.octet import Octet
+from src.gui.mixins import CallbackMixin
+from src.network_tools import IPV4Address
 
 
 class IPV4AddressBox(CallbackMixin, tk.Frame):

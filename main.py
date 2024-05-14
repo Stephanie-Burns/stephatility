@@ -1,8 +1,9 @@
 
 import tkinter as tk
 
-from gui import DirectoryCleaner, IPManager, TempFileGenerator
-from network_tools import IPV4Address, IPV4AddressConfiguration, NetworkService
+from src.gui import DirectoryCleaner, IPManager, TempFileGenerator
+from src.network_tools import IPV4Address, IPV4AddressConfiguration, NetworkService
+from src.application_config.logger import app_logger
 
 
 class UtilApp(tk.Frame):
@@ -18,19 +19,22 @@ class UtilApp(tk.Frame):
 
         # Initialize Containers
         self.directory_cleaner_0 = DirectoryCleaner(self,"C:/Viper")
-        self.directory_cleaner_0.grid(row=0, column=0, columnspan=4, sticky='ew', padx=5, pady=5)
+        self.directory_cleaner_0.grid(row=0, column=0, columnspan=4, sticky=tk.EW, padx=5, pady=5)
 
         self.directory_cleaner_1 = DirectoryCleaner(self,"C:/ViperConfigData")
-        self.directory_cleaner_1.grid(row=1, column=0, columnspan=4, sticky='ew', padx=5, pady=5)
+        self.directory_cleaner_1.grid(row=1, column=0, columnspan=4, sticky=tk.EW, padx=5, pady=5)
 
         self.tempfile_gen = TempFileGenerator(self)
-        self.tempfile_gen.grid(row=2, column=0, columnspan=4, sticky='ew', padx=5, pady=5)
+        self.tempfile_gen.grid(row=2, column=0, columnspan=4, sticky=tk.EW, padx=5, pady=5)
 
         self.ip_manager = IPManager(self, self.network_service)
-        self.ip_manager.grid(row=3, column=0, columnspan=4, sticky='ew', padx=5, pady=5)
+        self.ip_manager.grid(row=3, column=0, columnspan=4, sticky=tk.EW, padx=5, pady=5)
 
 
 def main():
+
+    app_logger.info("Starting GUI...")
+
     root = tk.Tk()
     root.title('StephAtility (lol)')
     app = UtilApp(root)

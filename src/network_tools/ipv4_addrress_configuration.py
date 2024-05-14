@@ -4,8 +4,8 @@ import re
 import subprocess
 from typing import Optional, Pattern
 
-from network_tools.enums import AdapterType
-from network_tools.network_config import NetworkConfig
+from src.network_tools import AdapterType
+from src.network_tools.network_config import NetworkConfig
 
 
 class IPV4AddressConfiguration:

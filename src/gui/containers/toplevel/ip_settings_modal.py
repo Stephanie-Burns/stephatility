@@ -1,10 +1,9 @@
 
 import tkinter as tk
 
-from gui.containers.frames.ip_address_field import IPV4AddressBox
-from gui.mixins import CallbackMixin
-from network_tools.ipv4_address import IPV4Address
-from network_tools.network_service import NetworkService
+from src.gui.containers.frames.ip_address_field import IPV4AddressBox
+from src.gui.mixins import CallbackMixin
+from src.network_tools import IPV4Address, NetworkService
 
 
 class IPSettingsModal(CallbackMixin, tk.Toplevel):
@@ -138,7 +137,7 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
 
 if __name__ == "__main__":
     def open_modal():
-        from network_tools.ipv4_addrress_configuration import IPV4AddressConfiguration
+        from src.network_tools.ipv4_addrress_configuration import IPV4AddressConfiguration
         modal = IPSettingsModal(root, NetworkService(IPV4AddressConfiguration))
         modal.transient(root)
         modal.grab_set()
