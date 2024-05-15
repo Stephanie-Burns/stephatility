@@ -104,7 +104,7 @@ class Octet(CallbackMixin, tk.Entry):
             bool: True if the octet meets the completion criteria, otherwise False.
         """
         display_value = self.get()
-        print(f'{display_value=}')
+
         if display_value:
 
             if display_value == "255" or display_value == "0":
@@ -122,7 +122,11 @@ class Octet(CallbackMixin, tk.Entry):
                 enums.KeySym.RETURN,
                 enums.KeySym.KP_Enter,
                 enums.KeySym.TAB
-        ) or event.char == enums.KeySym.PERIOD:
+        ):
+            self._modify_focus()
+            return enums.EventAction.BREAK
+
+        if event.char == enums.KeySym.PERIOD and self.get():
             self._modify_focus()
             return enums.EventAction.BREAK
 

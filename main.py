@@ -50,6 +50,5 @@ def main():
     app.pack()
     root.mainloop()
 
-
 if __name__ == "__main__":
     main()
