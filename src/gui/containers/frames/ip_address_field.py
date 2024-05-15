@@ -20,6 +20,7 @@ class IPV4AddressBox(CallbackMixin, tk.Frame):
 
         # Public Attributes
         self.ip_address = ip_address
+        self.octets = []
 
         # Frame - IPV4Address Box
         self.grid(sticky='ew', padx=10, pady=10)
@@ -35,6 +36,7 @@ class IPV4AddressBox(CallbackMixin, tk.Frame):
             )
             octet.grid(column=2 * i, row=0, padx=(0, 0))
             self.grid_columnconfigure(2 * i, weight=1)
+            self.octets.append(octet)
 
             # Label - Octet Seperator: '.'
             if i < 3:
@@ -50,6 +52,13 @@ class IPV4AddressBox(CallbackMixin, tk.Frame):
         if self.ip_address[position] != new_value:
             self.ip_address[position] = new_value
             self.emit_update()
+
+    def refresh(self):
+        """Refresh the content of the IP address box."""
+        for i in range(4):
+            self.octets[i].delete(0, tk.END)
+            self.octets[i].insert(0, self.ip_address[i])
+            self.octets[i].previous_valid_content = self.ip_address[i]
 
 
 def main():

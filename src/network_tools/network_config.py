@@ -90,7 +90,7 @@ class NetworkConfig:
             NetworkConfig: A new instance of NetworkConfig configured as per the dictionary.
         """
         return cls(
-            adapter_prefix=AdapterType[config_dict['adapter_prefix']],
+            adapter_prefix=AdapterType(config_dict['adapter_prefix']),
             adapter_name=config_dict['adapter_name'],
             ipv4_address=IPV4Address.from_string(config_dict['ipv4_address']),
             subnet_mask=IPV4Address.from_string(config_dict['subnet_mask']),

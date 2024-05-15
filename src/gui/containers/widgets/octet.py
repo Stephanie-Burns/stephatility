@@ -104,6 +104,7 @@ class Octet(CallbackMixin, tk.Entry):
             bool: True if the octet meets the completion criteria, otherwise False.
         """
         display_value = self.get()
+        print(f'{display_value=}')
         if display_value:
 
             if display_value == "255" or display_value == "0":
@@ -142,7 +143,7 @@ class Octet(CallbackMixin, tk.Entry):
         """Actions to preform when a key is released."""
         display_value = self.get()
 
-        if display_value and display_value != self.previous_valid_content:
+        if display_value:
             self.emit_update(self.position, display_value)
 
         if self._octet_value_threshold_reached():

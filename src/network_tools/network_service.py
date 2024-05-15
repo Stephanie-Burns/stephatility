@@ -1,5 +1,5 @@
 
-from typing import NamedTuple, Tuple
+from typing import NamedTuple, Optional, Tuple
 
 from src.network_tools import NetworkConfig
 
@@ -9,11 +9,12 @@ class NetworkService:
     Provides network configuration services, acting as a facade over underlying configuration management systems.
 
     Attributes:
-        configuration_manager: An instance of a class that implements the configuration management logic for network settings.
+        configuration_strategy: An instance of a class that implements the configuration management logic for network settings.
     """
-    def __init__(self, configuration_manager):
-        self.configuration_manager = configuration_manager
-        self.network_config = NetworkConfig()
+    def __init__(self, configuration_strategy, application_config: Optional['AppConfig'] = None):
+        self.configuration_strategy = configuration_strategy
+        self.app_config = application_config
+        self.network_config = self.app_config.get_network_config()
 
     def get_network_configuration(self) -> NetworkConfig:
         """
@@ -26,7 +27,9 @@ class NetworkService:
         Raises:
             Exception: Propagates exceptions that might be raised during the configuration fetching process.
         """
+
         self.network_config.update_configuration(self.network_config)
+
         return self.network_config
 
     def apply_configuration(self) -> Tuple[int, str]:
@@ -40,14 +43,20 @@ class NetworkService:
             Exception: Captures and returns any exceptions as part of the error message in the tuple.
         """
         try:
-            self.configuration_manager.apply_configuration(self.network_config)
-            # app_config.save(config.as_dict())
+            self.configuration_strategy.apply_configuration(self.network_config)
+
+            if self.app_config:
+                self.app_config.set_network_config(self.network_config)
+                self.app_config.save()
+
             return 0, "Network settings updated successfully!"
+
         except Exception as e:
             return 1, str(e)
 
 
 if __name__ == "__main__":
+
     # Example usage
     from ipv4_addrress_configuration import IPV4AddressConfiguration
     manager = IPV4AddressConfiguration()

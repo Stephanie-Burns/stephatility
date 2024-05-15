@@ -3,7 +3,7 @@ import tkinter as tk
 
 from src.gui.containers.frames.ip_address_field import IPV4AddressBox
 from src.gui.mixins import CallbackMixin
-from src.network_tools import IPV4Address, NetworkService
+from src.network_tools import NetworkService, AdapterType
 
 
 class IPSettingsModal(CallbackMixin, tk.Toplevel):
@@ -14,13 +14,13 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
         self.resizable(False, False)
 
         self.network_service = network_service
-        self.selected_network = None
 
-        self.network_configuration = {
-            "IP Address": IPV4Address.from_string('192.168.0.100'),
-            "Subnet Mask": IPV4Address.from_string('255.255.255.0'),
-            "Default Gateway": IPV4Address.from_string('192.168.0.1'),
-        }
+        self.var_selected_network = tk.StringVar()
+        self.var_selected_network.set(self.network_service.network_config.adapter_prefix.value)
+
+        self.var_adapter_name = tk.StringVar()
+        self.var_adapter_name.set(self.network_service.network_config.adapter_name)
+        self.var_adapter_name.trace("w", self._on_adapter_name_change)
 
         # Main container frame
         container = tk.Frame(self)
@@ -36,17 +36,8 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
 
         # Label and Entry for Ethernet Adapter
         tk.Label(adapter_frame, text="Adapter Name: ").grid(row=0, column=0, sticky='w')
-        adapter_entry = tk.Entry(adapter_frame, width=20)
-        adapter_entry.insert(0, "Ethernet")
+        adapter_entry = tk.Entry(adapter_frame, textvariable=self.var_adapter_name, width=20)
         adapter_entry.grid(row=0, column=2, sticky='e')
-
-        # Data for labels and octets
-        labels = ("IP Address", "Subnet Mask", "Default Gateway")
-        addrs = (
-            self.network_service.network_config.ipv4_address,
-            self.network_service.network_config.subnet_mask,
-            self.network_service.network_config.default_gateway
-        )
 
         # ==========
         # Frame to hold the radio buttons
@@ -59,12 +50,21 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
         radio_frame.grid_columnconfigure(0, weight=1)
         radio_frame.grid_columnconfigure(1, weight=1)
 
-        # Variable to hold the selected value
-        self.selected_network = tk.StringVar(value="Ethernet")  # Default to 'Ethernet'
-
         # Create radio buttons for network type selection
-        ethernet_radio = tk.Radiobutton(radio_frame, text="Ethernet", variable=self.selected_network, value="Ethernet")
-        wifi_radio = tk.Radiobutton(radio_frame, text="WiFi", variable=self.selected_network, value="WiFi")
+        ethernet_radio = tk.Radiobutton(
+            radio_frame,
+            text="Ethernet",
+            variable=self.var_selected_network,
+            value=AdapterType.ETHERNET.value,
+            command=self._on_radio_change
+        )
+        wifi_radio = tk.Radiobutton(
+            radio_frame,
+            text="WiFi",
+            variable=self.var_selected_network,
+            value=AdapterType.WIFI.value,
+            command=self._on_radio_change
+        )
 
         # Position the radio buttons side by side within the frame
         ethernet_radio.grid(row=0, column=0, sticky="ew")
@@ -114,9 +114,15 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
 
         self._check_apply_button_state()
 
-    def apply_action(self):
-        print("IP settings Modal: Apply button clicked")
+    def _on_adapter_name_change(self, *args):
+        self.network_service.network_config.adapter_name = self.var_adapter_name.get()
+        self._check_apply_button_state()
 
+    def _on_radio_change(self):
+        self.network_service.network_config.adapter_prefix = AdapterType(self.var_selected_network.get())
+        self._check_apply_button_state()
+
+    def apply_action(self):
         self.network_service.apply_configuration()
         self.network_service.network_config.reset_baseline()
         self.emit_update()
@@ -130,8 +136,6 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
             self.apply_button.config(state='disabled')
 
     def cancel_action(self):
-        print("IP settings Modal: Cancel button clicked")
-        print(self.network_service.network_config)
         self.destroy()
 
 

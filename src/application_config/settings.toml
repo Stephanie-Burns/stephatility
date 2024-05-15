@@ -1,0 +1,15 @@
+[DEFAULT]
+
+[NETWORK]
+default_gateway = "192.168.1.1"
+subnet_mask = "255.255.255.0"
+ipv4_address = "192.168.45.37"
+adapter_name = "Ethernet"
+adapter_prefix = "ethernet"
+
+[DIRECTORY_CLEANERS]
+dir0 = "C:/Viper"
+dir1 = "C:/ViperConfigData"
+
+[TEMPFILE_GEN]
+extensions = [ ".py", ".cs", ".md", ".txt",]

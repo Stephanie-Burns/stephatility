@@ -39,7 +39,7 @@ def configure_logger(
     return logger
 
 
-app_logger = configure_logger('StephAtilityLogger', log_to_console=True, log_to_file=True)
+app_logger = configure_logger('StephAtilityLogger', log_to_console=True, log_to_file=False)
 
 
 if __name__ == '__main__':

@@ -65,6 +65,10 @@ class Application(tk.Frame):
         except:
             pass  # Handle the case where no item is selected
 
-root = tk.Tk()
-app = Application(master=root)
-app.mainloop()
+
+if __name__ == '__main__':
+
+
+    root = tk.Tk()
+    app = Application(master=root)
+    app.mainloop()

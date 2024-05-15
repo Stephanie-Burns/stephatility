@@ -1,8 +1,8 @@
 import tkinter as tk
 
-from src.application_config import logger
-from src.gui.containers.toplevel.ip_settings_modal import IPSettingsModal
-from src.gui.containers.frames.ip_address_field import IPV4AddressBox
+from src.application_config.logger import app_logger
+from src.gui.containers.frames import IPV4AddressBox
+from src.gui.containers.toplevel import IPSettingsModal
 from src.network_tools import NetworkService
 
 
@@ -26,7 +26,7 @@ class IPManager(tk.Frame):
 
         # Label - IP Address
         self.label = tk.Label(self, text="IP Address:")
-        self.label.grid(row=0, column=0, padx=10, pady=10, sticky='W')
+        self.label.grid(row=0, column=0, padx=10, pady=10, sticky=tk.W)
 
         #  Frame - IPV4 Address Box
         self.ip_frame = IPV4AddressBox(
@@ -34,15 +34,17 @@ class IPManager(tk.Frame):
             self.network_service.network_config.ipv4_address,
             self._check_apply_button_state
         )
-        self.ip_frame.grid(row=0, column=1, padx=(10, 20), pady=10, sticky='E')
+        self.ip_frame.grid(row=0, column=1, padx=(10, 20), pady=10, sticky=tk.E)
 
         # Button - Apply
         self.apply_button = tk.Button(self, text="Apply", command=self._set_ip_address, width=20)
-        self.apply_button.grid(row=0, column=2, padx=(0, 10), pady=10, sticky='EW')
+        self.apply_button.grid(row=0, column=2, padx=(0, 10), pady=10, sticky=tk.EW)
+        self.apply_button.bind('<Return>', self._on_enter)
+        self.apply_button.bind('<KP_Enter>', self._on_enter)
 
         # Button - Manage
         self.manage_button = tk.Button(self, text="Manage", command=self._launch_manage_ip_modal, width=20)
-        self.manage_button.grid(row=0, column=3, padx=10, pady=10, sticky='EW')
+        self.manage_button.grid(row=0, column=3, padx=10, pady=10, sticky=tk.EW)
 
         self._check_apply_button_state()       # Initial check
 
@@ -53,23 +55,30 @@ class IPManager(tk.Frame):
             self.apply_button.config(state='disabled')
 
     def _set_ip_address(self):
-        previous_address = self.network_service.network_config.previous_config.get('ipv4_address')
-        current_address = self.network_service.network_config.ipv4_address
-        print(f'Changing addr: {previous_address=}, to: {current_address=}')
+        app_logger.info(
+            "Changing IP from %s, to: %s",
+            self.network_service.network_config.previous_config.get('ipv4_address'),
+            self.network_service.network_config.ipv4_address
+        )
 
         self.network_service.apply_configuration()
         self.network_service.network_config.reset_baseline()
         self._check_apply_button_state()
 
-    def _callback_ip_settings_changed(self):
-        self._check_apply_button_state()
-        print("IP Address changed from modal")
+    def _on_enter(self, event):
+        if self.apply_button == self.focus_get():
+            self.apply_button.invoke()
 
     def _launch_manage_ip_modal(self):
         if not self.modal_ip_settings or not self.modal_ip_settings.winfo_exists():
-            self.modal_ip_settings = IPSettingsModal(self, self.network_service, self._callback_ip_settings_changed)
+            self.modal_ip_settings = IPSettingsModal(self, self.network_service, self._on_modal_ip_change)
             self.modal_ip_settings.transient(self)
             self.modal_ip_settings.grab_set()
+
+    def _on_modal_ip_change(self):
+        self._check_apply_button_state()
+        self.ip_frame.refresh()
+
 
 
 def main():
