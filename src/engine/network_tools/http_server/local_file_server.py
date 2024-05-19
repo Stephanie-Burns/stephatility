@@ -69,3 +69,7 @@ class LocalFileServer:
 
     def validate_port(self, port: str) -> bool:
         return port.isdigit() and 1 <= int(port) <= 65535
+
+    def add_host_name(self, friendly_name: str) -> None:
+        batch_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "modify_hosts.bat"))
+        subprocess.run(["runas", "/user:Administrator", f'cmd /c "{batch_file_path} {friendly_name}"'])

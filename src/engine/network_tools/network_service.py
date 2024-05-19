@@ -1,4 +1,5 @@
 
+import platform
 from typing import NamedTuple, Optional, Tuple
 
 from src.engine.network_tools.ipv4 import  NetworkConfig
@@ -28,8 +29,10 @@ class NetworkService:
             Exception: Propagates exceptions that might be raised during the configuration fetching process.
         """
 
-        # TODO Neutered for Linux testing
-        # self.configuration_strategy.get_configuration(self.network_config)
+        # Neutered for Linux testing, it needs to be a strategy oneday. :)
+        if platform.system() == 'Windows':
+            self.configuration_strategy.get_configuration(self.network_config)
+
         self.network_config.update_configuration(self.network_config)
 
         return self.network_config

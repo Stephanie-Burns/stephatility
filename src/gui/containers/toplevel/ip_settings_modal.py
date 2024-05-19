@@ -1,5 +1,6 @@
 
 import tkinter as tk
+from pathlib import Path
 
 from src.engine.network_tools import NetworkService
 from src.engine.network_tools.enums import AdapterType
@@ -13,6 +14,11 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
         self.title("IP Configuration")
         self.geometry("350x260")
         self.resizable(False, False)
+
+        # TODO Move this logic out
+        icon_path = Path(__file__).resolve().parent.parent.parent.parent.parent / 'assets' / 'icons' / "ip-address.png"
+        icon_image = tk.PhotoImage(file=str(icon_path))
+        self.iconphoto(False, icon_image)
 
         self.network_service = network_service
 

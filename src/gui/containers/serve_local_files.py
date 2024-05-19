@@ -1,19 +1,16 @@
 
 import os
 import tkinter as tk
-
+from tkinter import filedialog, messagebox
 from typing import Optional
 from urllib.parse import urlparse
-
-
-from tkinter import filedialog, messagebox
 
 from src.gui.containers.widgets import ToggleButton
 from src.application_config.logger import app_logger
 
 
 class ServeLocalFiles(tk.Frame):
-    def __init__(self, parent: tk.Widget, server_backend: 'ServerBackend', **kwargs) -> None:
+    def __init__(self, parent: tk.Widget, file_server: 'LocalFileServer', **kwargs) -> None:
         super().__init__(parent, **kwargs)
 
         self.config(bg="#7393B3", borderwidth=2, relief="sunken")
@@ -36,7 +33,7 @@ class ServeLocalFiles(tk.Frame):
         self.dir_entry          : Optional[tk.Entry] = None
         self.browse_button      : Optional[tk.Button] = None
 
-        self.server_backend = server_backend
+        self.file_server = file_server
 
         # Create UI components
         self._create_row_file_server()
@@ -74,7 +71,6 @@ class ServeLocalFiles(tk.Frame):
         # Entry - HR Local Server Address
         self.hr_entry = tk.Entry(self, width=48)
         self.hr_entry.insert(0, "sharebear.local")
-        self.hr_entry.config(state="disabled")
         self.hr_entry.grid(row=1, column=1, columnspan=2, padx=(10, 10))
 
         # Toggle - Human Readable Address
@@ -120,10 +116,18 @@ class ServeLocalFiles(tk.Frame):
             self._stop_server()
 
     def on_hr_toggle_change(self) -> None:
-        if self.hr_toggle and self.hr_toggle.state:
-            self.hr_entry.configure(state='normal')
-        else:
+        local_address = self.hr_entry.get()
+        if not self._validate_url(local_address):
+            self.hr_toggle.state = False
+            self.hr_entry.configure(state="normal")
+            return
+
+        if self.hr_toggle.state:
             self.hr_entry.configure(state='disabled')
+
+            self.set_friendly_name(local_address)
+        else:
+            self.hr_entry.configure(state='normal')
 
     # Actions
 
@@ -132,13 +136,25 @@ class ServeLocalFiles(tk.Frame):
         port = self.port_entry.get()
 
         try:
-            self.server_backend.start_server(directory, port)
+            self.file_server.start_server(directory, port)
         except ValueError as e:
             self.server_toggle.state = False
             messagebox.showerror("Error", str(e))
 
     def _stop_server(self) -> None:
-        self.server_backend.stop_server()
+        self.file_server.stop_server()
+
+    def set_friendly_name(self, friendly_name: str) -> None:
+        try:
+            if not self.check_friendly_name_exists(friendly_name):
+                self.file_server.add_host_name(friendly_name)
+
+        except PermissionError as e:
+            messagebox.showerror("Permission Error", str(e))
+
+        except OSError as e:
+            messagebox.showerror("File Error", str(e))
+
 
     # Validators
 
@@ -162,7 +178,6 @@ class ServeLocalFiles(tk.Frame):
         return False
 
     def _validate_values(self) -> bool:
-        current_directory = self.dir_entry.get()
         port_value = self.port_entry.get()
         url_value = self.hr_entry.get()
 
@@ -175,6 +190,22 @@ class ServeLocalFiles(tk.Frame):
             return False
 
         return True
+
+    def check_friendly_name_exists(self, friendly_name: str) -> bool:
+        hosts_file_path = r"C:\Windows\System32\drivers\etc\hosts"
+
+        try:
+            with open(hosts_file_path, 'r') as hosts_file:
+                for line in hosts_file:
+                    if friendly_name in line:
+                        return True
+        except PermissionError as e:
+            raise PermissionError("Permission denied: Unable to read the hosts file.") from e
+        except OSError as e:
+            raise OSError("Error reading the hosts file.") from e
+
+        return False
+
 
 
 if __name__ == "__main__":
