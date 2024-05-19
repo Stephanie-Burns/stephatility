@@ -15,7 +15,7 @@ from src.application_config.logger import app_logger
 
 
 class ServeLocalFiles(tk.Frame):
-    def __init__(self, parent: tk.Widget, thread_service: 'ThreadService', **kwargs) -> None:
+    def __init__(self, parent: tk.Widget, thread_manager: 'ThreadManager', **kwargs) -> None:
         super().__init__(parent, **kwargs)
 
         self.config(bg="#7393B3", borderwidth=2, relief="sunken")
@@ -39,8 +39,9 @@ class ServeLocalFiles(tk.Frame):
         self.browse_button      : Optional[tk.Button] = None
 
 
+        self.thread_manager = thread_manager
         self.server_process = None
-        self.thread_service = thread_service
+        self.server_thread_id = None
 
 
         # Create UI components
@@ -110,6 +111,7 @@ class ServeLocalFiles(tk.Frame):
 
         server_enabled = self.server_toggle.state
 
+
         if not self._validate_values():
             self.server_toggle.state = False
             return
@@ -131,27 +133,12 @@ class ServeLocalFiles(tk.Frame):
         else:
             self.hr_entry.configure(state='disabled')
 
-    def start_server(self):
-        if self.server_process and self.server_process.poll() is None:
-            messagebox.showerror("Error", "Server is already running.")
-            return
-
-        directory = self.dir_entry.get()
-        port = self.port_entry.get()
-
+    def validate_directory(self, directory):
         if not directory:
             messagebox.showerror("Error", "Please select a directory to serve.")
             app_logger.error("No directory selected.")
-            return
+            return False
 
-        if not port.isdigit():
-            messagebox.showerror("Error", "Please enter a valid port number.")
-            app_logger.error("Invalid port number entered.")
-            return
-
-        port = int(port)
-
-        # Create the directory if it doesn't exist
         if not os.path.exists(directory):
             try:
                 os.makedirs(directory)
@@ -159,33 +146,60 @@ class ServeLocalFiles(tk.Frame):
             except OSError as e:
                 messagebox.showerror("Error", f"Failed to create directory: {e}")
                 app_logger.error(f"Failed to create directory: {e}")
-                return
+                return False
+        return True
 
-        def run_server(stop_event):
-            try:
-                os.chdir(directory)
-                self.server_process = subprocess.Popen(["python", "-m", "http.server", str(port)],
-                                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                app_logger.info(f"Serving HTTP on {directory} port {port}")
-                while not stop_event.is_set():
-                    if self.server_process.poll() is not None:
-                        break
-                    stop_event.wait(1)
-            except Exception as e:
-                app_logger.exception("Server crashed unexpectedly.")
-            finally:
-                if self.server_process:
-                    self.server_process.terminate()
-                    self.server_process = None
-                    app_logger.info("Server process terminated.")
+    def validate_port(self, port):
+        if not port.isdigit():
+            messagebox.showerror("Error", "Please enter a valid port number.")
+            app_logger.error("Invalid port number entered.")
+            return False
+        return True
 
-        server_thread = threading.Thread(target=run_server, args=(self.thread_service.stop_event,))
-        server_thread.daemon = True
-        self.thread_service.add_thread(server_thread)
-        app_logger.info(f"Server started in directory {directory} on port {port}")
+    def start_server(self):
+        directory = self.dir_entry.get()
+        port = self.port_entry.get()
+
+        if not self.validate_directory(directory) or not self.validate_port(port):
+            return
+
+        self.server_thread_id = self.thread_manager.add_thread(target=self.run_server, args=(directory, int(port)))
+
+        app_logger.info(f"Hosting {directory} @ http://localhost:{port}...")
+
+    def run_server(self, directory: str, port: int, stop_event: threading.Event):
+        try:
+            os.chdir(directory)
+            self.server_process = subprocess.Popen(
+                ["python", "-m", "http.server", str(port)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            app_logger.info(f"Hosting files from {directory} on port {port} with PID {self.server_process.pid}")
+
+            while not stop_event.is_set():
+                if self.server_process.poll() is not None:
+                    break
+                stop_event.wait(1)
+
+        except Exception as e:
+            app_logger.exception("Server crashed unexpectedly.")
+
+        finally:
+            self.terminate_server()
+
+    def terminate_server(self):
+        if self.server_process:
+            self.server_process.terminate()
+            self.server_process.wait()
+            app_logger.info(f"Stopped Server with PID {self.server_process.pid}")
+            self.server_process = None
 
     def stop_server(self):
-        self.thread_service.stop_all_threads()
+        if self.server_thread_id:
+            app_logger.info(f"Stopping server with PID {self.server_process.pid}...")
+            self.thread_manager.stop_thread(self.server_thread_id)
+            self.terminate_server()
 
     def _validate_port(self, port: str) -> bool:
         """Validate port entry to ensure it is an integer within the valid range."""
