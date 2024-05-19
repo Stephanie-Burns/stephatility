@@ -125,7 +125,7 @@ class ServeLocalFiles(tk.Frame):
         if self.hr_toggle.state:
             self.hr_entry.configure(state='disabled')
 
-            self.set_friendly_name(local_address)
+            self._set_friendly_name(local_address)
         else:
             self.hr_entry.configure(state='normal')
 
@@ -144,9 +144,9 @@ class ServeLocalFiles(tk.Frame):
     def _stop_server(self) -> None:
         self.file_server.stop_server()
 
-    def set_friendly_name(self, friendly_name: str) -> None:
+    def _set_friendly_name(self, friendly_name: str) -> None:
         try:
-            if not self.check_friendly_name_exists(friendly_name):
+            if not self._validate_friendly_name_exists(friendly_name):
                 self.file_server.add_host_name(friendly_name)
 
         except PermissionError as e:
@@ -157,25 +157,6 @@ class ServeLocalFiles(tk.Frame):
 
 
     # Validators
-
-    def _validate_port(self, port: str) -> bool:
-        """Validate port entry to ensure it is an integer within the valid range."""
-        if port.isdigit():
-            port_num = int(port)
-            if 1 <= port_num <= 65535:
-                return True
-        return False
-
-    def _validate_url(self, url: str) -> bool:
-        """Validate the URL to ensure it is a valid web address."""
-        result = urlparse(url)
-        if result.scheme and result.netloc:
-            return True
-        if not result.scheme and result.path:
-            # Handle local domain names like sharebear.local
-            if '.' in result.path and result.path.split('.')[0] and result.path.split('.')[-1]:
-                return True
-        return False
 
     def _validate_values(self) -> bool:
         port_value = self.port_entry.get()
@@ -191,7 +172,29 @@ class ServeLocalFiles(tk.Frame):
 
         return True
 
-    def check_friendly_name_exists(self, friendly_name: str) -> bool:
+    @staticmethod
+    def _validate_port(port: str) -> bool:
+        """Validate port entry to ensure it is an integer within the valid range."""
+        if port.isdigit():
+            port_num = int(port)
+            if 1 <= port_num <= 65535:
+                return True
+        return False
+
+    @staticmethod
+    def _validate_url(url: str) -> bool:
+        """Validate the URL to ensure it is a valid web address."""
+        result = urlparse(url)
+        if result.scheme and result.netloc:
+            return True
+        if not result.scheme and result.path:
+            # Handle local domain names like sharebear.local
+            if '.' in result.path and result.path.split('.')[0] and result.path.split('.')[-1]:
+                return True
+        return False
+
+    @staticmethod
+    def _validate_friendly_name_exists(friendly_name: str) -> bool:
         hosts_file_path = r"C:\Windows\System32\drivers\etc\hosts"
 
         try:
