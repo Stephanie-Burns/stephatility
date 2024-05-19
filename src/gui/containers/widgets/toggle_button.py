@@ -1,11 +1,14 @@
 
 import tkinter as tk
+from typing import Callable, Optional
 
+from src.gui.mixins import CallbackMixin
 
-class ToggleButton(tk.Canvas):
+class ToggleButton(CallbackMixin, tk.Canvas):
     def __init__(
             self,
             parent,
+            update_callback: Optional[Callable[..., None]] = None,
             width=65,
             height=25,
             toggle_on_color='#93b373',
@@ -17,6 +20,7 @@ class ToggleButton(tk.Canvas):
             **kwargs
     ):
         super().__init__(
+            update_callback,
             parent,
             width=width,
             height=height,
@@ -26,6 +30,7 @@ class ToggleButton(tk.Canvas):
             relief="solid",
             **kwargs
         )
+        self.update_callback = update_callback
         self.width = width
         self.height = height
         self.handle_size = height - 6  # Adjust handle size to leave space above and below
@@ -33,14 +38,14 @@ class ToggleButton(tk.Canvas):
         self.toggle_off_color = toggle_off_color
         self.handle_color = handle_color
         self.handle_border_color = handle_border_color
-        self.state = initial_state
+        self._state = initial_state
         self.handle_outer = None
         self.handle_inner = None
-        self.create_handle()
+        self._create_handle()
         self.bind("<Button-1>", self.toggle)
-        self.update_button()
+        self._update_button()
 
-    def create_handle(self):
+    def _create_handle(self):
         handle_margin = 3
         handle_inner_margin = 1
 
@@ -58,16 +63,18 @@ class ToggleButton(tk.Canvas):
         )
 
     def toggle(self, event=None):
-        self.state = not self.state
-        self.update_button()
+        self._state = not self._state
+        self._update_button()
+        self.emit_update()
 
-    def update_button(self):
+
+    def _update_button(self):
         # Constants for the positions
         handle_margin = 3
         handle_inner_margin = 1
         offset = ((self.height - 1) - self.handle_size) // 2  # Calculate vertical offset
 
-        if self.state:
+        if self._state:
             self.config(bg=self.toggle_on_color)
             self.coords(
                 self.handle_outer,
@@ -92,8 +99,14 @@ class ToggleButton(tk.Canvas):
                 self.handle_size + handle_margin - handle_inner_margin + 2, self.handle_size + offset + handle_margin - handle_inner_margin
             )
 
-    def get_state(self):
-        return self.state
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state: bool) -> None:
+        self._state = state
+        self._update_button()
 
 
 if __name__ == "__main__":
@@ -104,7 +117,7 @@ if __name__ == "__main__":
     toggle.pack(pady=20)
 
     def print_state():
-        print(f"Toggle state: {'On' if toggle.get_state() else 'Off'}")
+        print(f"Toggle state: {'On' if toggle.state else 'Off'}")
 
     state_button = tk.Button(root, text="Get Toggle State", command=print_state)
     state_button.pack(pady=20)
