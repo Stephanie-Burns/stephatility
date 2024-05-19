@@ -1,7 +1,7 @@
 
 from typing import NamedTuple, Optional, Tuple
 
-from src.network_tools import NetworkConfig
+from src.engine.network_tools.ipv4 import  NetworkConfig
 
 
 class NetworkService:
@@ -28,6 +28,7 @@ class NetworkService:
             Exception: Propagates exceptions that might be raised during the configuration fetching process.
         """
 
+        # TODO Neutered for Linux testing
         # self.configuration_strategy.get_configuration(self.network_config)
         self.network_config.update_configuration(self.network_config)
 
@@ -59,7 +60,7 @@ class NetworkService:
 if __name__ == "__main__":
 
     # Example usage
-    from ipv4_addrress_configuration import IPV4AddressConfiguration
+    from src.engine.network_tools.ipv4.ipv4_addrress_configuration import IPV4AddressConfiguration
     manager = IPV4AddressConfiguration()
     service = NetworkService(manager)
 

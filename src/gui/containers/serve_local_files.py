@@ -5,8 +5,6 @@ import tkinter as tk
 from typing import Optional
 from urllib.parse import urlparse
 
-import subprocess
-import threading
 
 from tkinter import filedialog, messagebox
 
@@ -15,7 +13,7 @@ from src.application_config.logger import app_logger
 
 
 class ServeLocalFiles(tk.Frame):
-    def __init__(self, parent: tk.Widget, thread_manager: 'ThreadManager', **kwargs) -> None:
+    def __init__(self, parent: tk.Widget, server_backend: 'ServerBackend', **kwargs) -> None:
         super().__init__(parent, **kwargs)
 
         self.config(bg="#7393B3", borderwidth=2, relief="sunken")
@@ -38,16 +36,14 @@ class ServeLocalFiles(tk.Frame):
         self.dir_entry          : Optional[tk.Entry] = None
         self.browse_button      : Optional[tk.Button] = None
 
-
-        self.thread_manager = thread_manager
-        self.server_process = None
-        self.server_thread_id = None
-
+        self.server_backend = server_backend
 
         # Create UI components
         self._create_row_file_server()
         self._create_row_hr_address()
         self._create_row_directory_picker()
+
+    # GUI Setup
 
     def _create_row_file_server(self) -> None:
         # Label - Port
@@ -107,10 +103,10 @@ class ServeLocalFiles(tk.Frame):
             self.dir_entry.delete(0, tk.END)
             self.dir_entry.insert(0, directory)
 
+    # Events
+
     def on_file_server_toggle_change(self) -> None:
-
         server_enabled = self.server_toggle.state
-
 
         if not self._validate_values():
             self.server_toggle.state = False
@@ -118,88 +114,33 @@ class ServeLocalFiles(tk.Frame):
 
         if self.server_toggle and server_enabled:
             self.port_entry.configure(state="disabled")
-
-            self.start_server()
-
+            self._start_server()
         else:
             self.port_entry.configure(state="normal")
-
-            self.stop_server()
+            self._stop_server()
 
     def on_hr_toggle_change(self) -> None:
-
         if self.hr_toggle and self.hr_toggle.state:
             self.hr_entry.configure(state='normal')
         else:
             self.hr_entry.configure(state='disabled')
 
-    def validate_directory(self, directory):
-        if not directory:
-            messagebox.showerror("Error", "Please select a directory to serve.")
-            app_logger.error("No directory selected.")
-            return False
+    # Actions
 
-        if not os.path.exists(directory):
-            try:
-                os.makedirs(directory)
-                app_logger.info(f"Directory created: {directory}")
-            except OSError as e:
-                messagebox.showerror("Error", f"Failed to create directory: {e}")
-                app_logger.error(f"Failed to create directory: {e}")
-                return False
-        return True
-
-    def validate_port(self, port):
-        if not port.isdigit():
-            messagebox.showerror("Error", "Please enter a valid port number.")
-            app_logger.error("Invalid port number entered.")
-            return False
-        return True
-
-    def start_server(self):
+    def _start_server(self) -> None:
         directory = self.dir_entry.get()
         port = self.port_entry.get()
 
-        if not self.validate_directory(directory) or not self.validate_port(port):
-            return
-
-        self.server_thread_id = self.thread_manager.add_thread(target=self.run_server, args=(directory, int(port)))
-
-        app_logger.info(f"Hosting {directory} @ http://localhost:{port}...")
-
-    def run_server(self, directory: str, port: int, stop_event: threading.Event):
         try:
-            os.chdir(directory)
-            self.server_process = subprocess.Popen(
-                ["python", "-m", "http.server", str(port)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            app_logger.info(f"Hosting files from {directory} on port {port} with PID {self.server_process.pid}")
+            self.server_backend.start_server(directory, port)
+        except ValueError as e:
+            self.server_toggle.state = False
+            messagebox.showerror("Error", str(e))
 
-            while not stop_event.is_set():
-                if self.server_process.poll() is not None:
-                    break
-                stop_event.wait(1)
+    def _stop_server(self) -> None:
+        self.server_backend.stop_server()
 
-        except Exception as e:
-            app_logger.exception("Server crashed unexpectedly.")
-
-        finally:
-            self.terminate_server()
-
-    def terminate_server(self):
-        if self.server_process:
-            self.server_process.terminate()
-            self.server_process.wait()
-            app_logger.info(f"Stopped Server with PID {self.server_process.pid}")
-            self.server_process = None
-
-    def stop_server(self):
-        if self.server_thread_id:
-            app_logger.info(f"Stopping server with PID {self.server_process.pid}...")
-            self.thread_manager.stop_thread(self.server_thread_id)
-            self.terminate_server()
+    # Validators
 
     def _validate_port(self, port: str) -> bool:
         """Validate port entry to ensure it is an integer within the valid range."""
@@ -239,8 +180,10 @@ class ServeLocalFiles(tk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("HTTP Server Utility")
-
-    app = ServeLocalFiles(root)
-    app.pack()
+    #
+    # thread_manager = ThreadManager()
+    # server_backend = ServerBackend(thread_manager)
+    # app = ServeLocalFiles(root, server_backend)
+    # app.pack()
 
     root.mainloop()

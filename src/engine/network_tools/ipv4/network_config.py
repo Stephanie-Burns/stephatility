@@ -3,7 +3,8 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Union
 
-from src.network_tools import AdapterType, IPV4Address
+from src.engine.network_tools.enums import AdapterType
+from src.engine.network_tools.ipv4 import IPV4Address
 
 
 @dataclass

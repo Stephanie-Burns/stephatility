@@ -1,6 +1,6 @@
 
 import unittest
-from src.network_tools import NetworkConfig, IPV4Address, AdapterType
+from src.engine.network_tools import NetworkConfig, IPV4Address, AdapterType
 
 
 class TestNetworkConfig(unittest.TestCase):

@@ -11,6 +11,7 @@ def configure_logger(
         level=logging.INFO
 ):
     absolute_file_path = Path(file_path).resolve()
+    print(absolute_file_path)
 
     logger = logging.getLogger(name)
     logger.setLevel(level)

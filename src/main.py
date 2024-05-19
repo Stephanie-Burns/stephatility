@@ -3,54 +3,11 @@ import tkinter as tk
 
 from src.application_config.logger import app_logger
 from src.application_config.app_config import AppConfig
+from src.engine.network_tools.http_server import ThreadManager
+from src.engine.network_tools.http_server.local_file_server import LocalFileServer
+from src.engine.network_tools import NetworkService
+from src.engine.network_tools.ipv4 import IPV4AddressConfiguration
 from src.gui import DirectoryCleaner, IPManager, ServeLocalFiles, TempFileGenerator
-from src.network_tools import IPV4AddressConfiguration, NetworkService
-
-
-import threading
-from typing import Callable
-
-
-class ThreadManager:
-    def __init__(self):
-        self.threads = {}
-        self.locks = {}
-        self.stop_events = {}
-        self.lock = threading.Lock()
-
-    def add_thread(self, target: Callable, args: tuple, daemon: bool = True) -> int:
-        stop_event = threading.Event()
-        thread = threading.Thread(target=target, args=args + (stop_event,))
-        thread.daemon = daemon
-        with self.lock:
-            thread.start()
-            self.threads[thread.ident] = thread
-            self.locks[thread.ident] = threading.Lock()
-            self.stop_events[thread.ident] = stop_event
-            return thread.ident
-
-    def stop_thread(self, identifier: int):
-        with self.lock:
-            stop_event = self.stop_events.pop(identifier, None)
-            thread = self.threads.pop(identifier, None)
-            if stop_event and thread:
-                stop_event.set()
-                thread.join()
-                self.locks.pop(identifier, None)
-
-    def stop_all_threads(self):
-        with self.lock:
-            for identifier, thread in list(self.threads.items()):
-                stop_event = self.stop_events.pop(identifier, None)
-                if stop_event:
-                    stop_event.set()
-                if thread.is_alive():
-                    thread.join()
-            self.threads.clear()
-            self.locks.clear()
-            self.stop_events.clear()
-
-
 
 
 class UtilApp(tk.Frame):
@@ -78,7 +35,7 @@ class UtilApp(tk.Frame):
         self.ip_manager = IPManager(self, self.network_service)
         self.ip_manager.grid(row=3, column=0, sticky=tk.EW, padx=5, pady=5)
 
-        self.local_file_server = ServeLocalFiles(self, self.thread_service)
+        self.local_file_server = ServeLocalFiles(self, LocalFileServer(self.thread_service))
         self.local_file_server.grid(row=4, column=0, sticky=tk.EW, padx=5, pady=5)
 
     def on_close(self):
@@ -92,7 +49,7 @@ def main():
 
     app_logger.info("Starting GUI...")
     from pathlib import Path
-    cfg = Path(__file__).resolve().parent / 'src' / 'application_config' / 'settings.toml'
+    cfg = Path(__file__).resolve().parent / 'application_config' / 'settings.toml'
     app_config = AppConfig(settings_files=[cfg])
 
     root = tk.Tk()
