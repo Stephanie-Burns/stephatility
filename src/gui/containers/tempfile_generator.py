@@ -31,7 +31,7 @@ class TempFileGenerator(tk.Frame):
             textvariable=self.current_file_extension,
             values=self.file_extensions,
             state='readonly',
-            width=50
+            width=53
         )
         self.file_extension_picker.grid(column=0, row=0, padx=10, pady=10, sticky=tk.W)
         self.file_extension_picker.set(self.file_extensions[0])         # default value

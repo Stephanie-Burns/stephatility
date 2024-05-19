@@ -28,7 +28,7 @@ class NetworkService:
             Exception: Propagates exceptions that might be raised during the configuration fetching process.
         """
 
-        self.configuration_strategy.get_configuration(self.network_config)
+        # self.configuration_strategy.get_configuration(self.network_config)
         self.network_config.update_configuration(self.network_config)
 
         return self.network_config
