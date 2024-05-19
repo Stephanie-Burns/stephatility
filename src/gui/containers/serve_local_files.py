@@ -15,7 +15,7 @@ from src.application_config.logger import app_logger
 
 
 class ServeLocalFiles(tk.Frame):
-    def __init__(self, parent: tk.Widget, **kwargs) -> None:
+    def __init__(self, parent: tk.Widget, thread_service: 'ThreadService', **kwargs) -> None:
         super().__init__(parent, **kwargs)
 
         self.config(bg="#7393B3", borderwidth=2, relief="sunken")
@@ -38,8 +38,10 @@ class ServeLocalFiles(tk.Frame):
         self.dir_entry          : Optional[tk.Entry] = None
         self.browse_button      : Optional[tk.Button] = None
 
+
         self.server_process = None
-        self.server_thread = None
+        self.thread_service = thread_service
+
 
         # Create UI components
         self._create_row_file_server()
@@ -107,10 +109,6 @@ class ServeLocalFiles(tk.Frame):
     def on_file_server_toggle_change(self) -> None:
 
         server_enabled = self.server_toggle.state
-        print(server_enabled)
-        # if self.server_toggle and not self._validate_values():
-        #     # self.server_toggle.toggle_off()
-        #     return
 
         if not self._validate_values():
             self.server_toggle.state = False
@@ -133,21 +131,25 @@ class ServeLocalFiles(tk.Frame):
         else:
             self.hr_entry.configure(state='disabled')
 
-    def start_server(self) -> None:
+    def start_server(self):
+        if self.server_process and self.server_process.poll() is None:
+            messagebox.showerror("Error", "Server is already running.")
+            return
+
         directory = self.dir_entry.get()
         port = self.port_entry.get()
 
         if not directory:
-            # self.server_toggle.toggle() TODO Find a better way
             messagebox.showerror("Error", "Please select a directory to serve.")
             app_logger.error("No directory selected.")
             return
 
         if not port.isdigit():
-            # self.server_toggle.toggle()
             messagebox.showerror("Error", "Please enter a valid port number.")
             app_logger.error("Invalid port number entered.")
             return
+
+        port = int(port)
 
         # Create the directory if it doesn't exist
         if not os.path.exists(directory):
@@ -155,25 +157,35 @@ class ServeLocalFiles(tk.Frame):
                 os.makedirs(directory)
                 app_logger.info(f"Directory created: {directory}")
             except OSError as e:
-                # self.server_toggle.toggle()
                 messagebox.showerror("Error", f"Failed to create directory: {e}")
                 app_logger.error(f"Failed to create directory: {e}")
                 return
 
-        self.server_thread = threading.Thread(target=self.run_server, args=(directory, port))
-        self.server_thread.start()
+        def run_server(stop_event):
+            try:
+                os.chdir(directory)
+                self.server_process = subprocess.Popen(["python", "-m", "http.server", str(port)],
+                                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                app_logger.info(f"Serving HTTP on {directory} port {port}")
+                while not stop_event.is_set():
+                    if self.server_process.poll() is not None:
+                        break
+                    stop_event.wait(1)
+            except Exception as e:
+                app_logger.exception("Server crashed unexpectedly.")
+            finally:
+                if self.server_process:
+                    self.server_process.terminate()
+                    self.server_process = None
+                    app_logger.info("Server process terminated.")
+
+        server_thread = threading.Thread(target=run_server, args=(self.thread_service.stop_event,))
+        server_thread.daemon = True
+        self.thread_service.add_thread(server_thread)
         app_logger.info(f"Server started in directory {directory} on port {port}")
 
-    def run_server(self, directory: str, port: int) -> None:
-        os.chdir(directory)
-        self.server_process = subprocess.Popen(["python", "-m", "http.server", port])
-        app_logger.info(f"Serving HTTP on {directory} port {port}")
-
-    def stop_server(self) -> None:
-        if self.server_process:
-            self.server_process.terminate()
-            self.server_process = None
-            app_logger.info("Server process terminated.")
+    def stop_server(self):
+        self.thread_service.stop_all_threads()
 
     def _validate_port(self, port: str) -> bool:
         """Validate port entry to ensure it is an integer within the valid range."""
@@ -200,18 +212,12 @@ class ServeLocalFiles(tk.Frame):
         url_value = self.hr_entry.get()
 
         if not self._validate_port(port_value):
-            # self.server_toggle.toggle()
             messagebox.showerror("Invalid Port", "Please enter a valid port number (1-65535).")
             return False
 
         if not self._validate_url(url_value):
-            # self.server_toggle.toggle()
             messagebox.showerror("Invalid URL", "Please enter a valid web address.")
             return False
-
-        print(f'Selected Directory: {current_directory}')
-        print(f'Port: {port_value}')
-        print(f'URL: {url_value}')
 
         return True
 
