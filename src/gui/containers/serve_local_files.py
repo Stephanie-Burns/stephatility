@@ -1,10 +1,8 @@
 
 import os
-import re
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from typing import Optional
-from urllib.parse import urlparse
 
 from src.gui.containers.widgets import ToggleButton
 from src.application_config.logger import app_logger
@@ -22,18 +20,18 @@ class ServeLocalFiles(tk.Frame):
         self.grid_columnconfigure(3, weight=1)
 
         # Initialize instance attributes
-        self.port_label         : Optional[tk.Label] = None
-        self.port_entry         : Optional[tk.Entry] = None
-        self.server_label       : Optional[tk.Label] = None
-        self.server_toggle      : Optional[ToggleButton] = None
+        self.port_label: Optional[tk.Label] = None
+        self.port_entry: Optional[tk.Entry] = None
+        self.server_label: Optional[tk.Label] = None
+        self.server_toggle: Optional[ToggleButton] = None
 
-        self.hr_label           : Optional[tk.Label] = None
-        self.hr_entry           : Optional[tk.Entry] = None
-        self.hr_toggle          : Optional[ToggleButton] = None
+        self.hr_label: Optional[tk.Label] = None
+        self.hr_entry: Optional[tk.Entry] = None
+        self.hr_toggle: Optional[ToggleButton] = None
 
-        self.dir_label          : Optional[tk.Label] = None
-        self.dir_entry          : Optional[tk.Entry] = None
-        self.browse_button      : Optional[tk.Button] = None
+        self.dir_label: Optional[tk.Label] = None
+        self.dir_entry: Optional[tk.Entry] = None
+        self.browse_button: Optional[tk.Button] = None
 
         self.file_server = file_server
 
@@ -51,7 +49,7 @@ class ServeLocalFiles(tk.Frame):
 
         # Entry - Port Number
         self.port_entry = tk.Entry(self, width=10, validate='key')
-        self.port_entry['validatecommand'] = (self.port_entry.register(self._validate_port), '%P')
+        self.port_entry['validatecommand'] = (self.port_entry.register(self.file_server.validate_port), '%P')
         self.port_entry.insert(0, '1337')
         self.port_entry.grid(row=0, column=1, sticky="w", padx=(10, 10))
 
@@ -106,8 +104,9 @@ class ServeLocalFiles(tk.Frame):
     def on_file_server_toggle_change(self) -> None:
         server_enabled = self.server_toggle.state
 
-        if not self._validate_port(self.port_entry.get()):
+        if not self.file_server.validate_port(self.port_entry.get()):
             self.server_toggle.state = False
+            messagebox.showerror("Invalid Port", "Please enter a valid port number (1-65535).")
             return
 
         if self.server_toggle and server_enabled:
@@ -120,7 +119,7 @@ class ServeLocalFiles(tk.Frame):
     def on_hr_toggle_change(self) -> None:
         local_address = self.hr_entry.get()
 
-        if not self._validate_url(local_address):
+        if not self.file_server.validate_url(local_address):
             self.hr_toggle.state = False
             self.hr_entry.configure(state="normal")
             messagebox.showerror(
@@ -138,7 +137,6 @@ class ServeLocalFiles(tk.Frame):
         if self.hr_toggle.state:
             self.hr_entry.configure(state='disabled')
             self._set_friendly_name(local_address)
-
         else:
             self.hr_entry.configure(state='normal')
 
@@ -166,12 +164,8 @@ class ServeLocalFiles(tk.Frame):
             return self.app_config.user_server_name
 
     def _set_friendly_name(self, new_friendly_name: str) -> None:
-
         try:
-            if self.file_server.friendly_name_exists(new_friendly_name):
-                return
-
-            self.file_server.modify_host_file(new_friendly_name, self.app_config.user_server_name)
+            self.file_server.set_friendly_name(new_friendly_name, self.app_config.user_server_name)
             self.app_config.user_server_name = new_friendly_name
 
         except PermissionError as e:
@@ -187,25 +181,6 @@ class ServeLocalFiles(tk.Frame):
         self.hr_toggle.state = False
         self.hr_entry.configure(state="normal")
         messagebox.showerror(title, message)
-
-    # Validators
-
-    @staticmethod
-    def _validate_port(port: str) -> bool:
-        """Validate port entry to ensure it is an integer within the valid range."""
-        if port.isdigit():
-            port_num = int(port)
-            if 1 <= port_num <= 65535:
-                return True
-
-        messagebox.showerror("Invalid Port", "Please enter a valid port number (1-65535).")
-        return False
-
-    @staticmethod
-    def _validate_url(domain: str) -> bool:
-        """Validate the local domain to ensure it contains only allowed characters."""
-        pattern = r'^[a-zA-Z0-9._-]+$'
-        return re.match(pattern, domain) is not None
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 import os
 import subprocess
 import threading
+import re
 
 from src.application_config.logger import app_logger
 
@@ -73,6 +74,12 @@ class LocalFileServer:
         return port.isdigit() and 1 <= int(port) <= 65535
 
     @staticmethod
+    def validate_url(domain: str) -> bool:
+        """Validate the local domain to ensure it contains only allowed characters."""
+        pattern = r'^[a-zA-Z0-9._-]+$'
+        return re.match(pattern, domain) is not None
+
+    @staticmethod
     def modify_host_file(new_name, old_name=""):
         batch_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "modify_hosts.bat"))
         subprocess.run(["runas", "/user:Administrator", f'cmd /c "{batch_file_path} {new_name} {old_name}"'])
@@ -87,3 +94,19 @@ class LocalFileServer:
                     return True
 
         return False
+
+    def set_friendly_name(self, new_friendly_name: str, current_friendly_name: str) -> None:
+        try:
+            if self.friendly_name_exists(new_friendly_name):
+                return
+
+            self.modify_host_file(new_friendly_name, current_friendly_name)
+
+        except PermissionError as e:
+            raise PermissionError("Permission Error", str(e))
+
+        except OSError as e:
+            raise OSError("File Error", str(e))
+
+        except Exception as e:
+            raise Exception("Error", str(e))
