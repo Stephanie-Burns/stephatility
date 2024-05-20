@@ -48,16 +48,16 @@ class ServeLocalFiles(tk.Frame):
         self.port_label.grid(row=0, column=0, sticky=tk.W, padx=(10, 10))
 
         # Entry - Port Number
-        self.port_entry = tk.Entry(self, width=10, validate='key')
+        self.port_entry = tk.Entry(self, width=6, validate='key')
         self.port_entry['validatecommand'] = (self.port_entry.register(self.file_server.validate_port), '%P')
         self.port_entry.insert(0, '1337')
-        self.port_entry.grid(row=0, column=1, sticky=tk.W, padx=(10, 10))
+        self.port_entry.grid(row=0, column=1, sticky=tk.W, padx=(12, 10))
 
         # Label - File Server
         self.server_label = tk.Label(
             self, text="File Server [disable/enable]:", fg='black', bg="#7393B3", font=("Arial", 14)
         )
-        self.server_label.grid(row=0, column=2, sticky=tk.E, padx=(0, 8))
+        self.server_label.grid(row=0, column=2, sticky=tk.E, padx=(5, 8))
 
         # Toggle - File Server State
         self.server_toggle = ToggleButton(self, initial_state=False, update_callback=self.on_file_server_toggle_change)
