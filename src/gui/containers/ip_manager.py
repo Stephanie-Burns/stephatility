@@ -80,7 +80,6 @@ class IPManager(tk.Frame):
         self.ip_frame.refresh()
 
 
-
 def main():
     from src.engine.network_tools.ipv4.ipv4_addrress_configuration import IPV4AddressConfiguration
     root = tk.Tk()

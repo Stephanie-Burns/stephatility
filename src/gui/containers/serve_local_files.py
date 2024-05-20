@@ -45,28 +45,28 @@ class ServeLocalFiles(tk.Frame):
     def _create_row_file_server(self) -> None:
         # Label - Port
         self.port_label = tk.Label(self, text="Port:", fg='black', bg="#7393B3", font=("Arial", 14))
-        self.port_label.grid(row=0, column=0, sticky="w", padx=(10, 10))
+        self.port_label.grid(row=0, column=0, sticky=tk.W, padx=(10, 10))
 
         # Entry - Port Number
         self.port_entry = tk.Entry(self, width=10, validate='key')
         self.port_entry['validatecommand'] = (self.port_entry.register(self.file_server.validate_port), '%P')
         self.port_entry.insert(0, '1337')
-        self.port_entry.grid(row=0, column=1, sticky="w", padx=(10, 10))
+        self.port_entry.grid(row=0, column=1, sticky=tk.W, padx=(10, 10))
 
         # Label - File Server
         self.server_label = tk.Label(
             self, text="File Server [disable/enable]:", fg='black', bg="#7393B3", font=("Arial", 14)
         )
-        self.server_label.grid(row=0, column=2, sticky="e", padx=(0, 8))
+        self.server_label.grid(row=0, column=2, sticky=tk.E, padx=(0, 8))
 
         # Toggle - File Server State
         self.server_toggle = ToggleButton(self, initial_state=False, update_callback=self.on_file_server_toggle_change)
-        self.server_toggle.grid(row=0, column=3, sticky="e", pady=(10, 10), padx=(0, 10))
+        self.server_toggle.grid(row=0, column=3, sticky=tk.E, pady=(10, 10), padx=(0, 10))
 
     def _create_row_hr_address(self) -> None:
         # Label - Human Readable Address
         self.hr_label = tk.Label(self, text="Human Readable Address:", fg='black', bg="#7393B3", font=("Arial", 14))
-        self.hr_label.grid(row=1, column=0, sticky="w", padx=(10, 0))
+        self.hr_label.grid(row=1, column=0, sticky=tk.W, padx=(10, 0))
 
         # Entry - HR Local Server Address
         self.hr_entry = tk.Entry(self, width=48)
@@ -75,12 +75,12 @@ class ServeLocalFiles(tk.Frame):
 
         # Toggle - Human Readable Address
         self.hr_toggle = ToggleButton(self, initial_state=False, update_callback=self.on_hr_toggle_change)
-        self.hr_toggle.grid(row=1, column=3, sticky="e", pady=(10, 10), padx=(0, 10))
+        self.hr_toggle.grid(row=1, column=3, sticky=tk.E, pady=(10, 10), padx=(0, 10))
 
     def _create_row_directory_picker(self) -> None:
         # Label - Directory to Serve
         self.dir_label = tk.Label(self, text="Directory to Serve:", fg='#010101', bg="#7393B3", font=("Arial", 14))
-        self.dir_label.grid(row=2, column=0, sticky="w", padx=(10, 82), pady=(10, 10))
+        self.dir_label.grid(row=2, column=0, sticky=tk.W, padx=(10, 82), pady=(10, 10))
 
         # Entry - Directory Picker
         self.dir_entry = tk.Entry(self, width=48)
@@ -91,7 +91,7 @@ class ServeLocalFiles(tk.Frame):
         self.browse_button = tk.Button(
             self, text="Browse", width=20, command=self._browse_directory, bg='#778da4', highlightbackground="black"
         )
-        self.browse_button.grid(row=2, column=3, sticky="e", padx=(10, 10), pady=(10, 10))
+        self.browse_button.grid(row=2, column=3, sticky=tk.E, padx=(10, 10), pady=(10, 10))
 
     def _browse_directory(self) -> None:
         directory = filedialog.askdirectory(initialdir=os.path.expanduser('~'))
