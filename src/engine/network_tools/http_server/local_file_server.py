@@ -1,8 +1,8 @@
 
 import os
+import re
 import subprocess
 import threading
-import re
 
 from src.application_config.logger import app_logger
 
