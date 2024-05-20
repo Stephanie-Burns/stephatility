@@ -1,2 +1,2 @@
-![1](./stephatility/assets/previews/main_window.png)
-![2](./stephatility/assets/previews/manage_ip_settings.png)
+![1](assets/previews/main_window.png)
+![2](assets/previews/manage_ip_settings.png)
