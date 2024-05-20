@@ -15,5 +15,5 @@ dir1 = "C:/ViperConfigData"
 extensions = [ ".py", ".cs", ".md", ".txt",]
 
 [HTTP_FILE_SERVER]
-user_server_name = ""
+user_server_name = "echoquiet.local"
 default_server_names = [ "filebeam.local", "syncbox.local", "filestop.local", "pixelstash.local", "memestream.local", "transfer.local", "quickshare.local", "sendbox.local", "echoquiet.local", "glowbytes.local", "dreamstream.local", "bitbeacon.local", "nodeload.local", "folderholder.local", "sharebear.local", "dirstop.local", "datadam.local", "billsgate.local", "datadock.local", "clipcloud.local",]

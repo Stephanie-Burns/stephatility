@@ -81,8 +81,22 @@ class LocalFileServer:
 
     @staticmethod
     def modify_host_file(new_name, old_name=""):
+        """
+        Modifies the hosts file using a batch script and PowerShell for elevated privileges.
+
+        Args:
+            new_name (str): The new hostname to add.
+            old_name (str): The old hostname to remove.
+
+        Raises:
+            subprocess.CalledProcessError: If the command fails.
+        """
+
+        old_name = new_name if not old_name else old_name
         batch_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "modify_hosts.bat"))
-        subprocess.run(["runas", "/user:Administrator", f'cmd /c "{batch_file_path} {new_name} {old_name}"'])
+        args = f'"{new_name}" "{old_name}"'
+        ps_command = f'Powershell -Command "Start-Process \'{batch_file_path}\' -ArgumentList \'{args}\' -Verb RunAs"'
+        subprocess.check_output(ps_command, shell=True)
 
     @staticmethod
     def friendly_name_exists(friendly_name: str) -> bool:
