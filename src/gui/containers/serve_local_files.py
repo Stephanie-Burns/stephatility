@@ -1,5 +1,6 @@
 
 import os
+import re
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from typing import Optional
@@ -10,8 +11,9 @@ from src.application_config.logger import app_logger
 
 
 class ServeLocalFiles(tk.Frame):
-    def __init__(self, parent: tk.Widget, file_server: 'LocalFileServer', **kwargs) -> None:
+    def __init__(self, parent: tk.Widget, file_server: 'LocalFileServer', app_config, **kwargs) -> None:
         super().__init__(parent, **kwargs)
+        self.app_config = app_config
 
         self.config(bg="#7393B3", borderwidth=2, relief="sunken")
         self.grid_columnconfigure(0, weight=1)
@@ -70,7 +72,7 @@ class ServeLocalFiles(tk.Frame):
 
         # Entry - HR Local Server Address
         self.hr_entry = tk.Entry(self, width=48)
-        self.hr_entry.insert(0, "sharebear.local")
+        self.hr_entry.insert(0, self._get_friendly_name())
         self.hr_entry.grid(row=1, column=1, columnspan=2, padx=(10, 10))
 
         # Toggle - Human Readable Address
@@ -104,7 +106,7 @@ class ServeLocalFiles(tk.Frame):
     def on_file_server_toggle_change(self) -> None:
         server_enabled = self.server_toggle.state
 
-        if not self._validate_values():
+        if not self._validate_port(self.port_entry.get()):
             self.server_toggle.state = False
             return
 
@@ -117,15 +119,26 @@ class ServeLocalFiles(tk.Frame):
 
     def on_hr_toggle_change(self) -> None:
         local_address = self.hr_entry.get()
+
         if not self._validate_url(local_address):
             self.hr_toggle.state = False
             self.hr_entry.configure(state="normal")
+            messagebox.showerror(
+                "Invalid Domain",
+                "Please enter a valid local domain.\n"
+                "(e.g., sharebear.local)\n\n"
+                "Allowed characters:\n"
+                "- Alphanumerics\n"
+                "- Dots\n"
+                "- Dashes\n"
+                "- Underscores"
+            )
             return
 
         if self.hr_toggle.state:
             self.hr_entry.configure(state='disabled')
-
             self._set_friendly_name(local_address)
+
         else:
             self.hr_entry.configure(state='normal')
 
@@ -144,33 +157,38 @@ class ServeLocalFiles(tk.Frame):
     def _stop_server(self) -> None:
         self.file_server.stop_server()
 
-    def _set_friendly_name(self, friendly_name: str) -> None:
+    def _get_friendly_name(self) -> str:
+        import random
+
+        if not self.app_config.user_server_name:
+            return random.choice(self.app_config.default_server_names)
+        else:
+            return self.app_config.user_server_name
+
+    def _set_friendly_name(self, new_friendly_name: str) -> None:
+
         try:
-            if not self._validate_friendly_name_exists(friendly_name):
-                self.file_server.add_host_name(friendly_name)
+            if self.file_server.friendly_name_exists(new_friendly_name):
+                return
+
+            self.file_server.modify_host_file(new_friendly_name, self.app_config.user_server_name)
+            self.app_config.user_server_name = new_friendly_name
 
         except PermissionError as e:
-            messagebox.showerror("Permission Error", str(e))
+            self._handle_hr_exception("Permission Error", str(e))
 
         except OSError as e:
-            messagebox.showerror("File Error", str(e))
+            self._handle_hr_exception("File Error", str(e))
 
+        except Exception as e:
+            self._handle_hr_exception("Error", str(e))
+
+    def _handle_hr_exception(self, title: str, message: str) -> None:
+        self.hr_toggle.state = False
+        self.hr_entry.configure(state="normal")
+        messagebox.showerror(title, message)
 
     # Validators
-
-    def _validate_values(self) -> bool:
-        port_value = self.port_entry.get()
-        url_value = self.hr_entry.get()
-
-        if not self._validate_port(port_value):
-            messagebox.showerror("Invalid Port", "Please enter a valid port number (1-65535).")
-            return False
-
-        if not self._validate_url(url_value):
-            messagebox.showerror("Invalid URL", "Please enter a valid web address.")
-            return False
-
-        return True
 
     @staticmethod
     def _validate_port(port: str) -> bool:
@@ -179,36 +197,15 @@ class ServeLocalFiles(tk.Frame):
             port_num = int(port)
             if 1 <= port_num <= 65535:
                 return True
+
+        messagebox.showerror("Invalid Port", "Please enter a valid port number (1-65535).")
         return False
 
     @staticmethod
-    def _validate_url(url: str) -> bool:
-        """Validate the URL to ensure it is a valid web address."""
-        result = urlparse(url)
-        if result.scheme and result.netloc:
-            return True
-        if not result.scheme and result.path:
-            # Handle local domain names like sharebear.local
-            if '.' in result.path and result.path.split('.')[0] and result.path.split('.')[-1]:
-                return True
-        return False
-
-    @staticmethod
-    def _validate_friendly_name_exists(friendly_name: str) -> bool:
-        hosts_file_path = r"C:\Windows\System32\drivers\etc\hosts"
-
-        try:
-            with open(hosts_file_path, 'r') as hosts_file:
-                for line in hosts_file:
-                    if friendly_name in line:
-                        return True
-        except PermissionError as e:
-            raise PermissionError("Permission denied: Unable to read the hosts file.") from e
-        except OSError as e:
-            raise OSError("Error reading the hosts file.") from e
-
-        return False
-
+    def _validate_url(domain: str) -> bool:
+        """Validate the local domain to ensure it contains only allowed characters."""
+        pattern = r'^[a-zA-Z0-9._-]+$'
+        return re.match(pattern, domain) is not None
 
 
 if __name__ == "__main__":

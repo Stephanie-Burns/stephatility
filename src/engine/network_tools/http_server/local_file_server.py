@@ -53,7 +53,8 @@ class LocalFileServer:
             self.thread_manager.stop_thread(self.server_thread_id)
             self.terminate_server()
 
-    def validate_directory(self, directory: str) -> bool:
+    @staticmethod
+    def validate_directory(directory: str) -> bool:
         if not directory:
             app_logger.error("No directory selected.")
             return False
@@ -67,9 +68,22 @@ class LocalFileServer:
                 return False
         return True
 
-    def validate_port(self, port: str) -> bool:
+    @staticmethod
+    def validate_port(port: str) -> bool:
         return port.isdigit() and 1 <= int(port) <= 65535
 
-    def add_host_name(self, friendly_name: str) -> None:
+    @staticmethod
+    def modify_host_file(new_name, old_name=""):
         batch_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "modify_hosts.bat"))
-        subprocess.run(["runas", "/user:Administrator", f'cmd /c "{batch_file_path} {friendly_name}"'])
+        subprocess.run(["runas", "/user:Administrator", f'cmd /c "{batch_file_path} {new_name} {old_name}"'])
+
+    @staticmethod
+    def friendly_name_exists(friendly_name: str) -> bool:
+        hosts_file_path = r"C:\Windows\System32\drivers\etc\hosts"
+
+        with open(hosts_file_path, 'r') as hosts_file:
+            for line in hosts_file:
+                if friendly_name in line:
+                    return True
+
+        return False

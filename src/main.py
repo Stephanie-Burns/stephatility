@@ -39,7 +39,7 @@ class StephaTility(tk.Frame):
         self.ip_manager = IPManager(self, self.network_service)
         self.ip_manager.grid(row=3, column=0, sticky=tk.EW, padx=5, pady=5)
 
-        self.file_server = ServeLocalFiles(self, self.http_file_server)
+        self.file_server = ServeLocalFiles(self, self.http_file_server, self.app_config.settings.http_file_server)
         self.file_server.grid(row=4, column=0, sticky=tk.EW, padx=5, pady=5)
 
     def on_close(self):
@@ -52,9 +52,10 @@ class StephaTility(tk.Frame):
 def main():
 
     app_logger.info("Starting GUI...")
+
     from pathlib import Path
     cfg = Path(__file__).resolve().parent / 'application_config' / 'settings.toml'
-    app_config = AppConfig(settings_files=[cfg])
+    app_config = AppConfig(settings_files=[str(cfg)])
 
     root = tk.Tk()
     root.title('StephaTility')
