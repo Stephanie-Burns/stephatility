@@ -4,6 +4,8 @@ from src.application_config.logger import app_logger
 from src.gui.containers.frames import IPV4AddressBox
 from src.gui.containers.toplevel import IPSettingsModal
 from src.engine.network_tools import NetworkService
+from src.gui.containers.widgets.blue_label import BlueLabel
+from src.gui.containers.widgets.blue_button import BlueButton
 
 
 class IPManager(tk.Frame):
@@ -19,31 +21,32 @@ class IPManager(tk.Frame):
         self.network_service = network_service
 
         # Frame - IPManager
-        self.grid(sticky='ew', padx=10, pady=10)
-        self.grid_columnconfigure(0, weight=40)
+        self.config(bg="#7393B3")
+        self.grid(sticky='ew')
+        self.grid_columnconfigure(0, weight=36)
         for i in range(3):
             self.grid_columnconfigure(i+1, weight=1)
 
         # Label - IP Address
-        self.label = tk.Label(self, text="IP Address:")
+        self.label = BlueLabel(self, text="IP Address:")
         self.label.grid(row=0, column=0, padx=10, pady=10, sticky=tk.W)
 
         #  Frame - IPV4 Address Box
         self.ip_frame = IPV4AddressBox(
             self,
             self.network_service.network_config.ipv4_address,
-            self._check_apply_button_state
+            self._check_apply_button_state,
         )
-        self.ip_frame.grid(row=0, column=1, padx=(10, 20), pady=10, sticky=tk.E)
+        self.ip_frame.grid(row=0, column=1, padx=(10, 18), pady=10, sticky=tk.E)
 
         # Button - Apply
-        self.apply_button = tk.Button(self, text="Apply", command=self._set_ip_address, width=20)
+        self.apply_button = BlueButton(self, text="Apply", command=self._set_ip_address, width=21)
         self.apply_button.grid(row=0, column=2, padx=(0, 10), pady=10, sticky=tk.EW)
         self.apply_button.bind('<Return>', self._on_enter)
         self.apply_button.bind('<KP_Enter>', self._on_enter)
 
         # Button - Manage
-        self.manage_button = tk.Button(self, text="Manage", command=self._launch_manage_ip_modal, width=20)
+        self.manage_button = BlueButton(self, text="Manage", command=self._launch_manage_ip_modal, width=19)
         self.manage_button.grid(row=0, column=3, padx=10, pady=10, sticky=tk.EW)
 
         self._check_apply_button_state()       # Initial check
@@ -64,6 +67,9 @@ class IPManager(tk.Frame):
         self.network_service.apply_configuration()
         self.network_service.network_config.reset_baseline()
         self._check_apply_button_state()
+
+        # Remove focus from entry widgets
+        self.focus_set()
 
     def _on_enter(self, event):
         if self.apply_button == self.focus_get():

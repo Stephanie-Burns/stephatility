@@ -23,6 +23,7 @@ class IPV4AddressBox(CallbackMixin, tk.Frame):
         self.octets = []
 
         # Frame - IPV4Address Box
+        self.config(bg="#7393B3")
         self.grid(sticky='ew', padx=10, pady=10)
 
         # Entry - Octet
@@ -40,7 +41,7 @@ class IPV4AddressBox(CallbackMixin, tk.Frame):
 
             # Label - Octet Seperator: '.'
             if i < 3:
-                dot_label = tk.Label(self, text=".")
+                dot_label = tk.Label(self, text=".", bg="#7393B3")
                 dot_label.grid(column=2 * i + 1, row=0, padx=3)
                 self.grid_columnconfigure(2 * i + 1, weight=0)
 

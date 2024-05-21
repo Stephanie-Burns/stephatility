@@ -9,7 +9,7 @@ class ToggleButton(CallbackMixin, tk.Canvas):
             self,
             parent,
             update_callback: Optional[Callable[..., None]] = None,
-            width=65,
+            width=40,
             height=25,
             toggle_on_color='#93b373',
             toggle_off_color='#b37393',
@@ -17,6 +17,7 @@ class ToggleButton(CallbackMixin, tk.Canvas):
             initial_state=False,
             border_color="black",
             handle_border_color="black",
+            glow_color='grey',
             **kwargs
     ):
         super().__init__(
@@ -38,16 +39,34 @@ class ToggleButton(CallbackMixin, tk.Canvas):
         self.toggle_off_color = toggle_off_color
         self.handle_color = handle_color
         self.handle_border_color = handle_border_color
+        self.glow_color = glow_color
+        self.border_color = border_color
         self._state = initial_state
         self.handle_outer = None
         self.handle_inner = None
         self._create_handle()
         self.bind("<Button-1>", self.toggle)
+        self.bind("<Enter>", self.on_enter)
+        self.bind("<Leave>", self.on_leave)
+
         self._update_button()
+
+    def on_enter(self, event):
+        self.config(highlightbackground=self.glow_color)
+
+    def on_leave(self, event):
+        self.config(highlightbackground=self.border_color)
 
     def _create_handle(self):
         handle_margin = 3
         handle_inner_margin = 1
+
+        # Draw the shadow part of the handle (simulating a sunken effect)
+        self.handle_shadow = self.create_rectangle(
+            handle_margin + 2, handle_margin + 2,
+            self.handle_size + handle_margin + 2, self.handle_size + handle_margin + 2,
+            fill='grey', outline=''
+        )
 
         # Draw the outer part of the handle (black border)
         self.handle_outer = self.create_rectangle(
@@ -55,10 +74,19 @@ class ToggleButton(CallbackMixin, tk.Canvas):
             self.handle_size + handle_margin, self.handle_size + handle_margin,
             fill=self.handle_border_color, outline=""
         )
+
+        # Draw the highlight part of the handle (simulating a raised effect)
+        self.handle_highlight = self.create_rectangle(
+            handle_margin, handle_margin,
+            self.handle_size + handle_margin, self.handle_size + handle_margin,
+            fill='#d8d8d8', outline=''
+        )
+
         # Draw the inner part of the handle
         self.handle_inner = self.create_rectangle(
             handle_margin + handle_inner_margin, handle_margin + handle_inner_margin,
-            self.handle_size + handle_margin - handle_inner_margin, self.handle_size + handle_margin - handle_inner_margin,
+            self.handle_size + handle_margin - handle_inner_margin,
+            self.handle_size + handle_margin - handle_inner_margin,
             fill=self.handle_color, outline=""
         )
 
@@ -77,7 +105,17 @@ class ToggleButton(CallbackMixin, tk.Canvas):
         if self._state:
             self.config(bg=self.toggle_on_color)
             self.coords(
+                self.handle_shadow,
+                self.width - self.handle_size - handle_margin + 2, offset + handle_margin + 2,
+                self.width - handle_margin + 2, self.handle_size + offset + handle_margin + 2
+            )
+            self.coords(
                 self.handle_outer,
+                self.width - self.handle_size - handle_margin, offset + handle_margin,
+                self.width - handle_margin, self.handle_size + offset + handle_margin
+            )
+            self.coords(
+                self.handle_highlight,
                 self.width - self.handle_size - handle_margin, offset + handle_margin,
                 self.width - handle_margin, self.handle_size + offset + handle_margin
             )
@@ -89,7 +127,17 @@ class ToggleButton(CallbackMixin, tk.Canvas):
         else:
             self.config(bg=self.toggle_off_color)
             self.coords(
+                self.handle_shadow,
+                handle_margin + 4, offset + handle_margin + 2,
+                self.handle_size + handle_margin + 4, self.handle_size + offset + handle_margin + 2
+            )
+            self.coords(
                 self.handle_outer,
+                handle_margin + 2, offset + handle_margin,
+                self.handle_size + handle_margin + 2, self.handle_size + offset + handle_margin
+            )
+            self.coords(
+                self.handle_highlight,
                 handle_margin + 2, offset + handle_margin,
                 self.handle_size + handle_margin + 2, self.handle_size + offset + handle_margin
             )
