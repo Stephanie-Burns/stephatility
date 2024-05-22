@@ -47,8 +47,6 @@ class DraggableTreeview(ttk.Treeview):
         else:
             self._stop_scrolling()
 
-        self._update_buttons_state()
-
     def _stop_dragging(self, event=None):
         self.dragging = False
         self._stop_scrolling()
@@ -73,8 +71,5 @@ class DraggableTreeview(ttk.Treeview):
             self.item(item, tags=tags)
 
     def _on_select(self, event):
-        self._update_buttons_state()
-
-    def _update_buttons_state(self):
-        if hasattr(self.master.master, 'update_buttons_state'):
-            self.master.master.update_buttons_state()
+        if hasattr(self.master.master, '_update_buttons_state'):
+            self.master.master._update_buttons_state()

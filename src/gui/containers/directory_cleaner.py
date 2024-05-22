@@ -54,33 +54,27 @@ class DirectoryCleaner(tk.Frame):
     def _delete_contents(self) -> None:
         folder = self.path_entry.get()
 
-        # Check if the directory exists
         if not os.path.isdir(folder):
             app_logger.debug("The specified directory doesn't exist: %s", folder)
             messagebox.showerror("Error", "The specified directory does not exist.")
             return
 
-        # Check if user is sure
         if not messagebox.askyesno("Confirm", f"Are you sure you want to delete all contents in {folder}?"):
             return
 
-        # Iterate through each item in the directory
         for item in os.listdir(folder):
             item_path = os.path.join(folder, item)
             try:
-
                 if os.path.isfile(item_path) or os.path.islink(item_path):
                     os.remove(item_path)
-
                 elif os.path.isdir(item_path):
                     shutil.rmtree(item_path)
-
                 app_logger.debug("Deleted %s", item_path)
 
             except Exception as e:
-                app_logger.debug("Failed to delete: %s", item_path, e)
+                app_logger.debug("Failed to delete: %s", item_path, exc_info=True)
                 messagebox.showerror("Error", f"Failed to delete {item_path}: {e}")
-                continue                                         # Continue deleting other items
+                continue
 
         app_logger.info("Contents deleted successfully: %s", folder)
         messagebox.showinfo("Success", "Contents deleted successfully.")
@@ -91,7 +85,7 @@ def main():
     root.title("Directory Cleaner")
 
     default_path = "/path/to/initial/directory"
-    app = DirectoryCleaner(root, default_path)
+    app = DirectoryCleaner(root, 0, default_path)
     app.pack(fill='both', expand=True)
 
     root.mainloop()

@@ -1,6 +1,7 @@
 
 import tkinter as tk
 from tkinter import ttk, messagebox
+from typing import List
 
 from src.constants import Colors, ASSETS_DIR
 from src.gui.containers.widgets.draggable_treeview import DraggableTreeview
@@ -8,11 +9,13 @@ from src.gui.containers.widgets.blue_button import BlueButton
 
 
 class ItemManager(tk.Toplevel):
-    def __init__(self, parent=None, item_type="Item", icon=None, **kwargs):
+    def __init__(self, parent=None, item_type="Item", icon=None, file_extensions: List[str] = None, **kwargs):
         super().__init__(parent, borderwidth=2, relief="raised", bg=Colors.ORBITAL, **kwargs)
         self.item_type = item_type
+        self.icon = icon
+        self.file_extensions = file_extensions
         self.title(f"{item_type} Manager")
-        self.geometry("500x500")
+        self.geometry("400x500")
         self.resizable(True, True)
         self.transient(parent)
         self.grab_set()
@@ -24,6 +27,8 @@ class ItemManager(tk.Toplevel):
 
         self._create_widgets()
         self._update_buttons_state()
+
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def _create_widgets(self):
         self.grid_columnconfigure(0, weight=1)
@@ -174,6 +179,14 @@ class ItemManager(tk.Toplevel):
         tags = ('even',) if len(self.tree.get_children()) % 2 == 0 else ('odd',)
         self.tree.insert("", tk.END, values=(item,), tags=tags)
         self._update_buttons_state()
+
+    def _on_close(self):
+        if self.get_items():
+            self.file_extensions[:] = self.get_items()
+        else:
+            self.file_extensions.clear()
+            self.file_extensions.append(".txt")
+        self.destroy()
 
 
 class _DemoApp(tk.Tk):
