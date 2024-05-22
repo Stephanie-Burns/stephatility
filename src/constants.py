@@ -7,8 +7,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # Specific paths
 ASSETS_DIR          = PROJECT_ROOT / 'assets' / 'icons'
 LOGS_DIR            = PROJECT_ROOT / 'logs' / 'app.log'
-SETTINGS_TOML       = PROJECT_ROOT / 'src' / 'application_config' / 'settings.toml'
-USER_SETTINGS_TOML  = PROJECT_ROOT / 'user' / 'user_settings.toml'
+SETTINGS_TOML       = PROJECT_ROOT / 'src' / 'application_config' / 'settings.toml'  # TODO Deprecate
+USER_SETTINGS_JSON  = PROJECT_ROOT / 'src' / 'application_config' / 'user_settings.json'
+USER_SETTINGS_TOML  = PROJECT_ROOT / 'user' / 'user_settings.toml'  # TODO Deprecate
 QUICK_WINIP_BAT     = PROJECT_ROOT / 'src' / 'engine' / 'network_tools' / 'quick_winip.bat'
 MODIFY_HOSTS_BAT    = PROJECT_ROOT / 'src' / 'engine' / 'network_tools' / 'http_server' / 'modify_hosts.bat'
 

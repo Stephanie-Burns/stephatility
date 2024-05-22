@@ -1,10 +1,10 @@
 
 import os
 import tkinter as tk
-from src.engine.network_tools.http_server import ThreadManager
-from src.engine.network_tools.http_server.local_file_server import LocalFileServer
-from src.engine.network_tools import NetworkService
-from src.engine.network_tools.ipv4 import IPV4AddressConfiguration
+from src.engine.network_center.http_server import ThreadManager
+from src.engine.network_center.http_server.local_file_server import LocalFileServer
+from src.engine.network_center import NetworkService
+from src.engine.network_center.ipv4 import IPV4AddressConfiguration
 from src.gui.containers.frames.directory_picker import DirectoryPickerRow
 from src.gui.containers.frames.file_server import FileServerRow
 from src.gui.containers.frames.localhost_setter import HRAddressRow

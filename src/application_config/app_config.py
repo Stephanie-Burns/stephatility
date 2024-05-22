@@ -5,8 +5,8 @@ import toml
 from dynaconf import Dynaconf
 
 from src.application_config.logger import app_logger
-from src.engine.network_tools.enums import AdapterType
-from src.engine.network_tools.ipv4 import NetworkConfig
+from src.engine.network_center.enums import AdapterType
+from src.engine.network_center.ipv4 import NetworkConfig
 
 
 class ConfigError(Exception):

@@ -3,7 +3,7 @@ import tkinter as tk
 from src.application_config.logger import app_logger
 from src.gui.containers.frames import IPV4AddressBox
 from src.gui.containers.toplevel import IPSettingsModal
-from src.engine.network_tools import NetworkService
+from src.engine.network_center import NetworkService
 from src.gui.containers.widgets.blue_label import BlueLabel
 from src.gui.containers.widgets.blue_button import BlueButton
 
@@ -87,7 +87,7 @@ class IPManager(tk.Frame):
 
 
 def main():
-    from src.engine.network_tools.ipv4.ipv4_addrress_configuration import IPV4AddressConfiguration
+    from src.engine.network_center.ipv4.ipv4_addrress_configuration import IPV4AddressConfiguration
     root = tk.Tk()
     root.title('Windows IP Manager')
     ip_manager = IPManager(root, NetworkService(IPV4AddressConfiguration()))

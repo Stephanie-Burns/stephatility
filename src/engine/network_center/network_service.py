@@ -2,7 +2,7 @@
 import platform
 from typing import NamedTuple, Optional, Tuple
 
-from src.engine.network_tools.ipv4 import  NetworkConfig
+from src.engine.network_center.ipv4 import  NetworkConfig
 
 
 class NetworkService:
@@ -63,7 +63,7 @@ class NetworkService:
 if __name__ == "__main__":
 
     # Example usage
-    from src.engine.network_tools.ipv4.ipv4_addrress_configuration import IPV4AddressConfiguration
+    from src.engine.network_center.ipv4.ipv4_addrress_configuration import IPV4AddressConfiguration
     manager = IPV4AddressConfiguration()
     service = NetworkService(manager)
 

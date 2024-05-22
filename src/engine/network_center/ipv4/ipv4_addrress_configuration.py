@@ -5,8 +5,8 @@ import subprocess
 from typing import Optional, Pattern
 
 from src.constants import QUICK_WINIP_BAT
-from src.engine.network_tools.enums import AdapterType
-from src.engine.network_tools.ipv4.network_config import NetworkConfig
+from src.engine.network_center.enums import AdapterType
+from src.engine.network_center.ipv4.network_config import NetworkConfig
 
 
 class IPV4AddressConfiguration:

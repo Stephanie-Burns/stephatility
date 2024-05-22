@@ -4,13 +4,16 @@ import shutil
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from typing import List
 
 from src.application_config.logger import app_logger
 
 
 class DirectoryCleaner(tk.Frame):
-    def __init__(self, parent, default_path, **kwargs):
+    def __init__(self, parent, uid: int, directories_to_delete: List[str], **kwargs):
         super().__init__(parent, **kwargs)
+        self.uid = uid
+        self.directories_to_delete = directories_to_delete
 
         # Frame - Directory Cleaner
         self.grid(sticky='ew', padx=10, pady=10)
@@ -21,7 +24,7 @@ class DirectoryCleaner(tk.Frame):
         # Entry - Path Entry
         self.path_entry = tk.Entry(self, width=50)
         self.path_entry.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky=tk.EW)
-        self.path_entry.insert(0, default_path)                    # Set default path
+        self.path_entry.insert(0, self.directories_to_delete[self.uid])
 
         # Button - Browse
         self.browse_button = tk.Button(
@@ -46,6 +49,7 @@ class DirectoryCleaner(tk.Frame):
         if folder_selected:
             self.path_entry.delete(0, tk.END)
             self.path_entry.insert(0, folder_selected)
+            self.directories_to_delete[self.uid] = folder_selected
 
     def _delete_contents(self) -> None:
         folder = self.path_entry.get()
