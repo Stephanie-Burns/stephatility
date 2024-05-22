@@ -3,6 +3,8 @@ import tkinter as tk
 from typing import Callable, Optional
 
 from src.gui.mixins import CallbackMixin
+from src.gui.containers.widgets.tooltip import add_tooltip
+
 
 class ToggleButton(CallbackMixin, tk.Canvas):
     def __init__(
@@ -31,20 +33,23 @@ class ToggleButton(CallbackMixin, tk.Canvas):
             relief="solid",
             **kwargs
         )
-        self.update_callback = update_callback
-        self.width = width
-        self.height = height
-        self.handle_size = height - 6  # Adjust handle size to leave space above and below
-        self.toggle_on_color = toggle_on_color
-        self.toggle_off_color = toggle_off_color
-        self.handle_color = handle_color
-        self.handle_border_color = handle_border_color
-        self.glow_color = glow_color
-        self.border_color = border_color
-        self._state = initial_state
-        self.handle_outer = None
-        self.handle_inner = None
+
+        self.update_callback        = update_callback
+        self.width                  = width
+        self.height                 = height
+        self.handle_size            = height - 6  # Adjust handle size to leave space above and below
+        self.toggle_on_color        = toggle_on_color
+        self.toggle_off_color       = toggle_off_color
+        self.handle_color           = handle_color
+        self.handle_border_color    = handle_border_color
+        self.glow_color             = glow_color
+        self.border_color           = border_color
+        self._state                 = initial_state
+        self.handle_outer           = None
+        self.handle_inner           = None
+
         self._create_handle()
+
         self.bind("<Button-1>", self.toggle)
         self.bind("<Enter>", self.on_enter)
         self.bind("<Leave>", self.on_leave)

@@ -1,6 +1,7 @@
 
 import logging
-from pathlib import Path
+
+from src.constants import LOGS_DIR
 
 
 def configure_logger(
@@ -10,7 +11,6 @@ def configure_logger(
         file_path='logs/app.log',
         level=logging.INFO
 ):
-    absolute_file_path = Path(file_path).resolve()
 
     logger = logging.getLogger(name)
     logger.setLevel(level)
@@ -32,14 +32,14 @@ def configure_logger(
 
     # File logging setup
     if log_to_file:
-        file_handler = logging.FileHandler(absolute_file_path)
+        file_handler = logging.FileHandler(str(file_path))
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
     return logger
 
 
-app_logger = configure_logger('StephAtilityLogger', log_to_console=True, log_to_file=False)
+app_logger = configure_logger('StephAtilityLogger', file_path=LOGS_DIR, log_to_console=True, log_to_file=False)
 
 
 if __name__ == '__main__':

@@ -4,6 +4,7 @@ import re
 import subprocess
 import threading
 
+from src.constants import MODIFY_HOSTS_BAT
 from src.application_config.logger import app_logger
 
 
@@ -93,7 +94,7 @@ class LocalFileServer:
         """
 
         old_name = new_name if not old_name else old_name
-        batch_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "modify_hosts.bat"))
+        batch_file_path = MODIFY_HOSTS_BAT
         args = f'"{new_name}" "{old_name}"'
         ps_command = f'Powershell -Command "Start-Process \'{batch_file_path}\' -ArgumentList \'{args}\' -Verb RunAs"'
         subprocess.check_output(ps_command, shell=True)

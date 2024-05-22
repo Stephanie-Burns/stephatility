@@ -4,6 +4,7 @@ import re
 import subprocess
 from typing import Optional, Pattern
 
+from src.constants import QUICK_WINIP_BAT
 from src.engine.network_tools.enums import AdapterType
 from src.engine.network_tools.ipv4.network_config import NetworkConfig
 
@@ -26,7 +27,7 @@ class IPV4AddressConfiguration:
         Raises:
             subprocess.CalledProcessError: If the command fails.
         """
-        bat_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../quick_winip.bat'))
+        bat_file_path = QUICK_WINIP_BAT
         args = f'"{config.adapter_name}", "{config.ipv4_address}", "{config.subnet_mask}"'
         if config.default_gateway != "0.0.0.0":
             args += f', "{config.default_gateway}"'

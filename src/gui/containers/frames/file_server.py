@@ -4,6 +4,7 @@ from tkinter import messagebox
 from typing import Callable
 from src.gui.containers.widgets import ToggleButton
 from src.gui.containers.widgets.blue_label import BlueLabel
+from src.gui.containers.widgets.tooltip import add_tooltip
 
 class FileServerRow(tk.Frame):
     def __init__(
@@ -29,12 +30,16 @@ class FileServerRow(tk.Frame):
         self.port_entry = tk.Entry(self, width=6, validate='key')
         self.port_entry['validatecommand'] = (self.port_entry.register(self.file_server.validate_port), '%P')
         self.port_entry.insert(0, '1337')
-        self.port_entry.grid(row=0, column=1, sticky=tk.W, padx=(80, 0))
+        self.port_entry.grid(row=0, column=1, sticky=tk.W, padx=(3, 30))
 
-        self.server_label = BlueLabel(self, text="File Server [disable/enable]:")
-        self.server_label.grid(row=0, column=2, sticky=tk.E, padx=(0, 75))
+        self.server_label = BlueLabel(self, text="HTTP File Server:")
+        self.server_label.grid(row=0, column=2, sticky=tk.E, padx=(0, 47))
 
-        self.server_toggle = ToggleButton(self, initial_state=False, update_callback=self.on_file_server_toggle_change)
+        self.server_toggle = (
+            ToggleButton(self, initial_state=False, update_callback=self.on_file_server_toggle_change)
+        )
+        add_tooltip(self.server_toggle, "[disable/enable] local server ", position=tk.W, offset_x=180, offset_y=12)
+
         self.server_toggle.grid(row=0, column=3, sticky=tk.E, pady=(10, 10), padx=(30, 10))
 
     def on_file_server_toggle_change(self) -> None:

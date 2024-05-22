@@ -2,6 +2,7 @@
 import tkinter as tk
 from pathlib import Path
 
+from src.constants import ASSETS_DIR
 from src.engine.network_tools import NetworkService
 from src.engine.network_tools.enums import AdapterType
 from src.gui.containers.frames.ip_address_field import IPV4AddressBox
@@ -15,8 +16,7 @@ class IPSettingsModal(CallbackMixin, tk.Toplevel):
         self.geometry("350x260")
         self.resizable(False, False)
 
-        # TODO Move this logic out
-        icon_path = Path(__file__).resolve().parent.parent.parent.parent.parent / 'assets' / 'icons' / "ip-address.png"
+        icon_path = ASSETS_DIR / "ip-address.png"
         icon_image = tk.PhotoImage(file=str(icon_path))
         self.iconphoto(False, icon_image)
 

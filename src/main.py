@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import PhotoImage
 
+from src.constants import ASSETS_DIR, SETTINGS_TOML
 from src.application_config.logger import app_logger
 from src.application_config.app_config import AppConfig
 from src.engine.network_tools.http_server import ThreadManager
@@ -51,14 +52,12 @@ def main():
 
     app_logger.info("Starting GUI...")
 
-    from pathlib import Path
-    cfg = Path(__file__).resolve().parent / 'application_config' / 'settings.toml'
-    app_config = AppConfig(settings_files=[str(cfg)])
+    app_config = AppConfig(settings_files=[str(SETTINGS_TOML)])
 
     root = tk.Tk()
     root.title('StephaTility')
 
-    icon_path = Path(__file__).resolve().parent.parent / 'assets' / 'icons' / "app.png"
+    icon_path = ASSETS_DIR / "app.png"
     icon_image = PhotoImage(file=str(icon_path))
     root.iconphoto(False, icon_image)
 
@@ -67,6 +66,7 @@ def main():
 
     root.protocol("WM_DELETE_WINDOW", app.on_close)
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
