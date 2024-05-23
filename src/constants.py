@@ -15,11 +15,19 @@ MODIFY_HOSTS_BAT    = PROJECT_ROOT / 'src' / 'engine' / 'network_tools' / 'http_
 
 
 class Colors:
-    ORBITAL = "#7378b3"
-    BLUE_GRAY = "#7393B3"
-    HEART_POTION = "#b373a8"
-    SAGE = "#7eb373"
-    WHITE = "#ffffff"
-    CARBON = "#333333"
-    SNOWFLAKE = '#f0f0f0'  # soft white
-    CONCRETE = '#d0d0d0'
+    HEART_POTION    = '#b373a8'
+    ORBITAL         = '#7378b3'
+    CAVOLO_NERO     = '#778DA4'
+    BLUE_GRAY       = '#7393B3'
+
+    SAGE            = '#7eb373'
+
+    BLACK           = '#000000'
+    CARBON          = '#333333'
+    MOON_BASE       = '#7b7b7b'
+    CONCRETE        = '#d0d0d0'
+    SNOWFLAKE       = '#f0f0f0'
+    WHITE           = '#ffffff'
+
+    LAKE_LUCERNE    = '#73a0b3'
+    KIMONO          = '#7386b3'

@@ -9,8 +9,8 @@ class BlueButton(tk.Button):
         kwargs.setdefault('bg', '#778da4')
         kwargs.setdefault('disabledbackground', '#f0f0f0')
         kwargs.setdefault('width', 20)
-        kwargs.setdefault('highlightbackground', "black")
-        kwargs.setdefault('disabledforeground', "#7b7b7b")
+        kwargs.setdefault('highlightbackground', 'black')
+        kwargs.setdefault('disabledforeground', '#7b7b7b')
 
         self.normal_bg = kwargs['bg']
         self.disabled_bg = kwargs.pop('disabledbackground')
@@ -32,14 +32,14 @@ class _BlueButtonDemo(tk.Frame):
         super().__init__(parent)
         self.pack(pady=20)
 
-        self.default_disabled_bg_button = BlueButton(self, text="Default Disabled BG", command=self.toggle_default)
+        self.default_disabled_bg_button = BlueButton(self, text='Default Disabled BG', command=self.toggle_default)
         self.default_disabled_bg_button.pack(pady=10)
 
-        self.custom_disabled_bg_button = BlueButton(self, text="Custom Disabled BG", command=self.toggle_custom,
+        self.custom_disabled_bg_button = BlueButton(self, text='Custom Disabled BG', command=self.toggle_custom,
                                                     disabledbackground='#ffffff')
         self.custom_disabled_bg_button.pack(pady=10)
 
-        self.toggle_button = tk.Button(self, text="Toggle Both Buttons State", command=self.toggle_both)
+        self.toggle_button = tk.Button(self, text='Toggle Both Buttons State', command=self.toggle_both)
         self.toggle_button.pack(pady=20)
 
     def toggle_default(self):
