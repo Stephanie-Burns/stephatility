@@ -13,6 +13,10 @@ class EntryValidation(StrEnum):
     INSERT = '1'
     DELETE = '0'
 
+class WidgetState(StrEnum):
+    ENABLED = "!disabled"
+    DISABLED = "disabled"
+
 
 class KeySym(StrEnum):
     """
@@ -23,3 +27,9 @@ class KeySym(StrEnum):
     KP_Enter = "KP_Enter"
     TAB = "Tab"
     PERIOD = "."
+
+
+class KeyBind(StrEnum):
+    RETURN = '<Return>'
+    ENTER = '<KP_Enter>'
+    KEY_RELEASE = '<KeyRelease>'

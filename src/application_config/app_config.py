@@ -4,7 +4,7 @@ from typing import List, Optional
 import toml
 from dynaconf import Dynaconf
 
-from src.application_config.logger import app_logger
+from src.application_config.app_logger import app_logger
 from src.engine.network_center.enums import AdapterType
 from src.engine.network_center.ipv4 import NetworkConfig
 

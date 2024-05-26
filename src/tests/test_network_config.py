@@ -1,6 +1,7 @@
 
 import unittest
-from src.engine.network_center import NetworkConfig, IPV4Address, AdapterType
+from src.engine.network_center.ipv4 import NetworkConfig, IPV4Address
+from src.engine.network_center.enums import AdapterType
 
 
 class TestNetworkConfig(unittest.TestCase):

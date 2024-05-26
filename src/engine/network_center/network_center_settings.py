@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
-from src.application_config.base_settings import BaseSettings
+from src.application_config.base.base_settings import BaseSettings
 
 
 def default_hosts() -> List[Tuple[str, str]]:

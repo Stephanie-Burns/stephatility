@@ -5,7 +5,7 @@ from tkinter import filedialog, messagebox
 from typing import Optional
 
 from src.gui.containers.widgets import ToggleButton
-from src.application_config.logger import app_logger
+from src.application_config.app_logger import app_logger
 
 
 class ServeLocalFiles(tk.Frame):

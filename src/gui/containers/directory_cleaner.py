@@ -3,67 +3,64 @@ import os
 import shutil
 
 import tkinter as tk
-from tkinter import filedialog, messagebox
-from typing import List
+from tkinter import messagebox, ttk
 
-from src.application_config.logger import app_logger
+from src.application_config.app_logger import app_logger
+from src.constants import Colors
+from src.gui.containers.widgets.directory_picker import DirectoryPicker
+from src.engine.file_center.file_center_settings import FileCenterSettings
 
 
 class DirectoryCleaner(tk.Frame):
-    def __init__(self, parent, uid: int, directories_to_delete: List[str], **kwargs):
-        super().__init__(parent, **kwargs)
-        self.uid = uid
-        self.directories_to_delete = directories_to_delete
-
-        # Frame - Directory Cleaner
-        self.grid(sticky='ew', padx=10, pady=10)
-        self.grid_columnconfigure(0, weight=3)
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_columnconfigure(2, weight=1)
-
-        # Entry - Path Entry
-        self.path_entry = tk.Entry(self, width=50)
-        self.path_entry.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky=tk.EW)
-        self.path_entry.insert(0, self.directories_to_delete[self.uid])
-
-        # Button - Browse
-        self.browse_button = tk.Button(
+    def __init__(
             self,
-            text="Browse",
-            command=self._browse_folder,
-            width=20
-        )
-        self.browse_button.grid(row=0, column=2, padx=10, sticky=tk.EW)
+            parent,
+            uid: int = 0,
+            user_settings: FileCenterSettings = None,
+            **kwargs
+    ):
+        super().__init__(parent, background=Colors.BLUE_GRAY, **kwargs)
+        self._user_settings = user_settings
+
+        self.uid = uid
+
+        # Frame - Self
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=0)
+        self.grid_rowconfigure(0, weight=1)
+
+        # Frame - Directory Picker
+        self.directory_picker = DirectoryPicker(self, update_callback=self._on_directory_picker_change)
+        self.directory_picker.set_directory(self.load_user_directory())
+        self.directory_picker.grid(row=0, column=0, sticky=tk.EW)
 
         # Button - Delete Contents
-        self.delete_button = tk.Button(
+        self.delete_button = ttk.Button(
             self,
             text="Delete Contents",
+            style="Blue.TButton",
+            width=20,
             command=self._delete_contents,
-            width=20
         )
-        self.delete_button.grid(row=0, column=3, padx=10, sticky=tk.EW)
+        self.delete_button.grid(row=0, column=2, padx=(10, 0), sticky=tk.EW)
 
-    def _browse_folder(self):
-        folder_selected = filedialog.askdirectory(initialdir=self.path_entry.get())
-        if folder_selected:
-            self.path_entry.delete(0, tk.END)
-            self.path_entry.insert(0, folder_selected)
-            self.directories_to_delete[self.uid] = folder_selected
+    def _on_directory_picker_change(self) -> None:
+        self.save_user_directory(self.directory_picker.get_directory())
 
     def _delete_contents(self) -> None:
-        folder = self.path_entry.get()
+        directory = self.directory_picker.get_directory()
 
-        if not os.path.isdir(folder):
-            app_logger.debug("The specified directory doesn't exist: %s", folder)
+        if not directory or not os.path.isdir(directory):
+            app_logger.debug("The specified directory doesn't exist: '%s'", directory)
             messagebox.showerror("Error", "The specified directory does not exist.")
             return
 
-        if not messagebox.askyesno("Confirm", f"Are you sure you want to delete all contents in {folder}?"):
+        prompt = f"Are you sure you want to delete all contents in {directory}?"
+        if not messagebox.askyesno("Confirm", prompt):
             return
 
-        for item in os.listdir(folder):
-            item_path = os.path.join(folder, item)
+        for item in os.listdir(directory):
+            item_path = os.path.join(directory, item)
             try:
                 if os.path.isfile(item_path) or os.path.islink(item_path):
                     os.remove(item_path)
@@ -76,20 +73,35 @@ class DirectoryCleaner(tk.Frame):
                 messagebox.showerror("Error", f"Failed to delete {item_path}: {e}")
                 continue
 
-        app_logger.info("Contents deleted successfully: %s", folder)
+        self.save_user_directory(directory)
+
+        app_logger.info("Contents deleted successfully: %s", directory)
         messagebox.showinfo("Success", "Contents deleted successfully.")
 
+    def save_user_directory(self, directory) -> None:
+        if self._user_settings is not None:
+            self._user_settings.set_directory_to_police(self.uid, directory)
 
-def main():
-    root = tk.Tk()
-    root.title("Directory Cleaner")
-
-    default_path = "/path/to/initial/directory"
-    app = DirectoryCleaner(root, 0, default_path)
-    app.pack(fill='both', expand=True)
-
-    root.mainloop()
+    def load_user_directory(self) -> str:
+        return self._user_settings.get_directory_to_police(self.uid) if self._user_settings is not None else ''
 
 
-if __name__ == "__main__":
-    main()
+class DemoApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Directory Cleaner Demo")
+        self.geometry("400x100")
+
+        configure_styles()
+        initialize_icons()
+
+        self.directory_cleaner = DirectoryCleaner(self, 0)
+        self.directory_cleaner.pack(fill=tk.X, padx=10, pady=10)
+
+
+if __name__ == '__main__':
+    from src.gui.styles import configure_styles
+    from src.application_config.icon_setup import initialize_icons
+
+    app = DemoApp()
+    app.mainloop()

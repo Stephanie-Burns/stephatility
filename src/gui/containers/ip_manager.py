@@ -1,12 +1,13 @@
 import tkinter as tk
+import tkinter.ttk as ttk
 
-from src.application_config.logger import app_logger
+from src.application_config.app_logger import app_logger
 from src.gui.containers.frames import IPV4AddressBox
 from src.gui.containers.toplevel import IPSettingsModal
 from src.engine.network_center import NetworkService
 from src.gui.containers.widgets.blue_label import BlueLabel
 from src.gui.containers.widgets.blue_button import BlueButton
-
+from src.constants import Colors
 
 class IPManager(tk.Frame):
     def __init__(
@@ -21,9 +22,9 @@ class IPManager(tk.Frame):
         self.network_service = network_service
 
         # Frame - IPManager
-        self.config(bg="#7393B3")
-        self.grid(sticky='ew')
-        self.grid_columnconfigure(0, weight=36)
+        self.config(bg=Colors.BLUE_GRAY)
+        self.grid(sticky=tk.EW)
+        self.grid_columnconfigure(0, weight=1)
         for i in range(3):
             self.grid_columnconfigure(i+1, weight=1)
 
@@ -37,25 +38,36 @@ class IPManager(tk.Frame):
             self.network_service.network_config.ipv4_address,
             self._check_apply_button_state,
         )
-        self.ip_frame.grid(row=0, column=1, padx=(10, 18), pady=10, sticky=tk.E)
+        self.ip_frame.grid(row=0, column=1, padx=(0, 20), pady=10, sticky=tk.E)
 
         # Button - Apply
-        self.apply_button = BlueButton(self, text="Apply", command=self._set_ip_address, width=21)
+        self.apply_button = ttk.Button(
+            self,
+            text="Apply",
+            style="Blue.TButton",
+            command=self._set_ip_address,
+        )
         self.apply_button.grid(row=0, column=2, padx=(0, 10), pady=10, sticky=tk.EW)
         self.apply_button.bind('<Return>', self._on_enter)
         self.apply_button.bind('<KP_Enter>', self._on_enter)
 
         # Button - Manage
-        self.manage_button = BlueButton(self, text="Manage", command=self._launch_manage_ip_modal, width=19)
-        self.manage_button.grid(row=0, column=3, padx=10, pady=10, sticky=tk.EW)
+        self.manage_button = ttk.Button(
+            self,
+            text="Manage",
+            style="Blue.TButton",
+            command=self._launch_manage_ip_modal
+        )
+        self.manage_button.grid(row=0, column=3, padx=(0, 10), pady=10, sticky=tk.EW)
 
         self._check_apply_button_state()       # Initial check
 
+
     def _check_apply_button_state(self) -> None:
         if self.network_service.network_config.has_changed():
-            self.apply_button.config(state='normal')
+            self.apply_button.state(["!disabled"])
         else:
-            self.apply_button.config(state='disabled')
+            self.apply_button.state(["disabled"])
 
     def _set_ip_address(self):
         app_logger.info(

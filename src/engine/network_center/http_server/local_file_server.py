@@ -5,7 +5,7 @@ import subprocess
 import threading
 
 from src.constants import MODIFY_HOSTS_BAT
-from src.application_config.logger import app_logger
+from src.application_config.app_logger import app_logger
 
 
 class LocalFileServer:
