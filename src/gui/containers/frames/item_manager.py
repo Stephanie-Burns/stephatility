@@ -3,9 +3,10 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from typing import List
 
-from src.constants import Colors, ASSETS_DIR
+from src.constants import Colors
 from src.gui.containers.widgets.draggable_treeview import DraggableTreeview
 from src.gui.containers.widgets.blue_button import BlueButton
+from src.gui.icon_manager import IconManager
 
 
 class ItemManager(tk.Toplevel):
@@ -21,9 +22,12 @@ class ItemManager(tk.Toplevel):
         self.grab_set()
         self.focus_set()
 
+        self.icon_manager = IconManager()
         if icon:
-            self.icon = tk.PhotoImage(file=str(icon))
             self.iconphoto(False, self.icon)
+        else:
+            self.iconphoto(False, self.icon_manager.get_icon('file_extensions', (16, 16)))
+
 
         self._create_widgets()
         self._update_buttons_state()
@@ -196,13 +200,15 @@ class _DemoApp(tk.Tk):
         self.geometry("500x500")
         self.configure(bg=Colors.BLUE_GRAY)
 
+        configure_styles()
+        initialize_icons()
+
         self.open_button = ttk.Button(self, text="Open Item Manager", command=self.open_item_manager)
         self.open_button.pack(pady=20)
 
     def open_item_manager(self):
 
-        icon_path = str(ASSETS_DIR / "file.png")
-        item_manager = ItemManager(self, item_type="Extension", icon=icon_path)
+        item_manager = ItemManager(self, item_type="Extension")
         item_manager.set_items([
             ".txt", ".pdf", ".docx", ".xlsx", ".pptx",
             ".jpg", ".png", ".gif", ".bmp", ".svg",
@@ -215,5 +221,8 @@ class _DemoApp(tk.Tk):
 
 
 if __name__ == '__main__':
+    from src.gui.styles import configure_styles
+    from src.application_config.icon_setup import initialize_icons
+
     app = _DemoApp()
     app.mainloop()
