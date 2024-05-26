@@ -8,6 +8,7 @@ from tkinter import messagebox, ttk
 from src.application_config.app_logger import app_logger
 from src.constants import Colors
 from src.gui.containers.widgets.directory_picker import DirectoryPicker
+from src.gui.containers.widgets.tooltip import add_tooltip
 from src.engine.file_center.file_center_settings import FileCenterSettings
 
 
@@ -43,6 +44,9 @@ class DirectoryCleaner(tk.Frame):
             command=self._delete_contents,
         )
         self.delete_button.grid(row=0, column=2, padx=(10, 0), sticky=tk.EW)
+        tooltip_message = ('Delete all files and directories in the selected path.\n'
+                           'This action is irreversible.')
+        add_tooltip(self.delete_button, text=tooltip_message, position=tk.S, offset_x=0)
 
     def _on_directory_picker_change(self) -> None:
         self.save_user_directory(self.directory_picker.get_directory())

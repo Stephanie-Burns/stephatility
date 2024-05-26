@@ -31,8 +31,10 @@ class DirectoryPicker(CallbackMixin, tk.Frame):
 
     def _create_widgets(self) -> None:
         # Entry - Selected directory
-        self.selected_directory = tk.Entry(self, textvariable=self.directory, relief=tk.SUNKEN)
-        self.selected_directory.grid(row=0, column=0, sticky=tk.EW, padx=(0, 5))
+        self.selected_directory = tk.Entry(
+            self, textvariable=self.directory, borderwidth=4, background=Colors.BLUE_GRAY_BRIGHT,relief=tk.SUNKEN
+        )
+        self.selected_directory.grid(row=0, column=0, sticky=tk.EW, padx=(0, 0))
 
         # Button - Open the directory picker dialog
         self.pick_button = ttk.Button(self, style="Blue.TButton", command=self._pick_directory)

@@ -69,7 +69,7 @@ class TempFileGenerator(tk.Frame):
         self.create_open_button.grid(column=2, row=0, padx=(10, 0), pady=(0, 0), sticky=tk.EW)
         tooltip_message = ('Create and open a temporary file with the selected extension.\n'
                            'The file will be deleted by the system when no longer needed.')
-        add_tooltip(self.create_open_button, text=tooltip_message, position=tk.S)
+        add_tooltip(self.create_open_button, text=tooltip_message, position=tk.S, offset_x=-290)
 
     def _on_manage_clicked(self):
         if self._extension_manager is None or not tk.Toplevel.winfo_exists(self._extension_manager):
