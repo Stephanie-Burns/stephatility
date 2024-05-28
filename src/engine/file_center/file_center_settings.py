@@ -1,9 +1,9 @@
 
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional, Callable, Union
 
 from src.application_config.app_logger import app_logger
-from src.application_config.base.base_settings import BaseSettings
+from src.application_config.base.base_settings import BaseSettings, DefaultDictMixin
 
 
 def default_directories_to_police() -> Dict[str, str]:
@@ -23,7 +23,7 @@ def default_temp_file_extensions() -> Dict[str, List[str]]:
 
 
 @dataclass
-class FileCenterSettings(BaseSettings):
+class FileCenterSettings(DefaultDictMixin, BaseSettings):
     directories_to_police: Dict[str, str] = field(default_factory=default_directories_to_police)
     temp_file_extensions: Dict[str, List[str]] = field(default_factory=default_temp_file_extensions)
 
@@ -47,9 +47,11 @@ class FileCenterSettings(BaseSettings):
             if not isinstance(key, str):
                 app_logger.error("Invalid key: %s", key)
                 return False
+
             if not isinstance(directory, str):
                 app_logger.error("Invalid directory: %s", directory)
                 return False
+
         return True
 
     def _validate_extensions(self) -> bool:
@@ -57,7 +59,9 @@ class FileCenterSettings(BaseSettings):
             if not isinstance(key, str):
                 app_logger.error("Invalid key: %s", key)
                 return False
+
             if not all(isinstance(ext, str) for ext in extensions):
                 app_logger.error("Invalid extensions in key %s: %s", key, extensions)
                 return False
+
         return True

@@ -1,8 +1,9 @@
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from src.application_config.base.base_settings import BaseSettings
+from src.engine.network_center.ipv4.network_config import NetworkConfig
 
 
 def default_hosts() -> List[Tuple[str, str]]:
@@ -38,21 +39,37 @@ def default_hosts_file() -> str:
     return host_file_str
 
 
-def default_network_configuration() -> Dict[str, str]:
-    return {
-        "default_gateway"   : "0.0.0.0",
-        "subnet_mask"       : "255.255.255.0",
-        "ipv4_address"      : "192.168.1.37",
-        "adapter_name"      : "Ethernet",
-        "adapter_prefix"    : "ethernet",
-}
+def default_network_configuration() -> NetworkConfig:
+    return NetworkConfig()
 
 
 @dataclass
 class NetworkCenterSettings(BaseSettings):
     hosts                   : List[Tuple[str, str]] = field(default_factory=default_hosts)
     last_seen_hosts_file    : str = field(default_factory=default_hosts_file)
-    network_configuration   : dict = field(default_factory=default_network_configuration)
+    network_configuration   : NetworkConfig = field(default_factory=NetworkConfig)
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {
+            "hosts": self.hosts,
+            "last_seen_hosts_file": self.last_seen_hosts_file,
+            "network_configuration": self.network_configuration.as_dict()
+        }
+
+    @classmethod
+    def from_dict(cls, config_dict: Dict[str, Any]) -> 'NetworkCenterSettings':
+        return cls(
+            hosts=config_dict.get("hosts", default_hosts()),
+            last_seen_hosts_file=config_dict.get("last_seen_hosts_file", default_hosts_file()),
+            network_configuration=NetworkConfig.from_dict(config_dict.get("network_configuration", {}))
+        )
 
     def validate(self) -> bool:
         return True
+
+    def get_network_configuration(self) -> NetworkConfig:
+        return self.network_configuration if self.network_configuration else default_network_configuration()
+
+    def set_network_configuration(self, network_config: NetworkConfig):
+        if network_config is not self.network_configuration:
+            raise Exception("Network configuration is already set.")

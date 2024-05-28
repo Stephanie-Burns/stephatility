@@ -1,6 +1,8 @@
 
 import os
 import tkinter as tk
+
+from src.engine.network_center.network_center_settings import NetworkCenterSettings
 from src.engine.network_center.http_server import ThreadManager
 from src.engine.network_center.http_server.local_file_server import LocalFileServer
 from src.engine.network_center import NetworkService
@@ -12,16 +14,16 @@ from src.gui.containers.ip_manager import IPManager
 
 
 class NetworkCenter(tk.Frame):
-    def __init__(self, parent: tk.Widget, app_config, thread_manager: ThreadManager, **kwargs) -> None:
+    def __init__(self, parent: tk.Widget, user_settings: NetworkCenterSettings, thread_manager: ThreadManager, **kwargs) -> None:
         super().__init__(parent, **kwargs)
         self.config(borderwidth=2, relief="sunken")
 
         self.directory_var = tk.StringVar(value=os.path.join(os.path.expanduser('~'), 'file-pile'))
 
-        self.app_config = app_config
+        self.user_settings = user_settings
         self.thread_manager = thread_manager
 
-        self.network_service = NetworkService(IPV4AddressConfiguration(), self.app_config)
+        self.network_service = NetworkService(IPV4AddressConfiguration(), self.user_settings)
         self.network_service.get_network_configuration()
 
         self.file_server = LocalFileServer(self.thread_manager)
@@ -39,6 +41,5 @@ class NetworkCenter(tk.Frame):
         # self.hr_address_row.grid(row=3, column=0, sticky='ew')
 
     def on_close(self):
-        """Handle the window close event to save the configuration before exiting."""
-        self.app_config.save()
+        """Handle any cleanup necessary when the NetworkCenter is closed."""
         self.file_server.stop_server()

@@ -44,7 +44,7 @@ class TestNetworkConfig(unittest.TestCase):
 
     def test_to_dict(self):
         # Test exporting configuration to dictionary
-        config_dict = self.config.to_dict()
+        config_dict = self.config.as_dict()
         expected_dict = {
             "adapter_prefix": AdapterType.ETHERNET,
             "adapter_name": "eth0",

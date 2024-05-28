@@ -5,10 +5,10 @@ from typing import Any, Dict, Union
 
 from src.engine.network_center.enums import AdapterType
 from src.engine.network_center.ipv4 import IPV4Address
-
+from src.application_config.base.base_settings import BaseSettings
 
 @dataclass
-class NetworkConfig:
+class NetworkConfig(BaseSettings):
     adapter_prefix  : AdapterType = AdapterType.ETHERNET
     adapter_name    : str = 'Ethernet'
     ipv4_address    : IPV4Address = field(default_factory=lambda: IPV4Address.from_string('0.0.0.0'))
@@ -25,7 +25,7 @@ class NetworkConfig:
         """Check equality by comparing configurations."""
         if not isinstance(other, NetworkConfig):
             return NotImplemented
-        return self.to_dict() == other.to_dict()
+        return self.as_dict() == other.as_dict()
 
     def _validate_network_config(self) -> None:
         """Validate that all configuration fields are instances of IPV4Address."""
@@ -34,11 +34,11 @@ class NetworkConfig:
 
     def _capture_initial_config(self) -> None:
         """Capture the initial state of the configuration for change tracking."""
-        self.previous_config = self.to_dict()
+        self.previous_config = self.as_dict()
 
     def has_changed(self) -> bool:
         """Determine if the current configuration has changed from the previously captured state."""
-        return self.to_dict() != self.previous_config
+        return self.as_dict() != self.previous_config
 
     def reset_baseline(self) -> None:
         """Reset the baseline configuration to the current state."""
@@ -70,10 +70,10 @@ class NetworkConfig:
 
         self._validate_network_config()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> Dict[str, Any]:
         """Convert the current configuration to a dictionary."""
         return {
-            "adapter_prefix": self.adapter_prefix,
+            "adapter_prefix": self.adapter_prefix.value,
             "adapter_name": self.adapter_name,
             "ipv4_address": str(self.ipv4_address),
             "subnet_mask": str(self.subnet_mask),
@@ -91,7 +91,7 @@ class NetworkConfig:
             NetworkConfig: A new instance of NetworkConfig configured as per the dictionary.
         """
         return cls(
-            adapter_prefix=AdapterType(config_dict['adapter_prefix']),
+            adapter_prefix=AdapterType(config_dict['adapter_prefix'].lower()),
             adapter_name=config_dict['adapter_name'],
             ipv4_address=IPV4Address.from_string(config_dict['ipv4_address']),
             subnet_mask=IPV4Address.from_string(config_dict['subnet_mask']),

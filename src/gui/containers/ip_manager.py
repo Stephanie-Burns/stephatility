@@ -25,12 +25,13 @@ class IPManager(tk.Frame):
         self.config(bg=Colors.BLUE_GRAY)
         self.grid(sticky=tk.EW)
         self.grid_columnconfigure(0, weight=1)
-        for i in range(3):
-            self.grid_columnconfigure(i+1, weight=1)
+        self.grid_columnconfigure(1, weight=0)
+        self.grid_rowconfigure(2, weight=0)
+        self.grid_rowconfigure(3, weight=0)
 
         # Label - IP Address
         self.label = BlueLabel(self, text="IP Address:")
-        self.label.grid(row=0, column=0, padx=10, pady=10, sticky=tk.W)
+        self.label.grid(row=0, column=0, padx=(10, 0), pady=0, sticky=tk.W)
 
         #  Frame - IPV4 Address Box
         self.ip_frame = IPV4AddressBox(
@@ -38,7 +39,7 @@ class IPManager(tk.Frame):
             self.network_service.network_config.ipv4_address,
             self._check_apply_button_state,
         )
-        self.ip_frame.grid(row=0, column=1, padx=(0, 20), pady=10, sticky=tk.E)
+        self.ip_frame.grid(row=0, column=1, padx=(0, 16), pady=0, sticky=tk.EW)
 
         # Button - Apply
         self.apply_button = ttk.Button(
@@ -47,7 +48,7 @@ class IPManager(tk.Frame):
             style="Blue.TButton",
             command=self._set_ip_address,
         )
-        self.apply_button.grid(row=0, column=2, padx=(0, 10), pady=10, sticky=tk.EW)
+        self.apply_button.grid(row=0, column=2, padx=(0, 65), pady=0, sticky=tk.EW)
         self.apply_button.bind('<Return>', self._on_enter)
         self.apply_button.bind('<KP_Enter>', self._on_enter)
 
@@ -58,7 +59,7 @@ class IPManager(tk.Frame):
             style="Blue.TButton",
             command=self._launch_manage_ip_modal
         )
-        self.manage_button.grid(row=0, column=3, padx=(0, 10), pady=10, sticky=tk.EW)
+        self.manage_button.grid(row=0, column=3, padx=(0, 0), pady=0, sticky=tk.EW)
 
         self._check_apply_button_state()       # Initial check
 

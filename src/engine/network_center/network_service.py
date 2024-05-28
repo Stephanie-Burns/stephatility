@@ -3,6 +3,7 @@ import platform
 from typing import NamedTuple, Optional, Tuple
 
 from src.engine.network_center.ipv4 import  NetworkConfig
+from src.engine.network_center.network_center_settings import NetworkCenterSettings
 
 
 class NetworkService:
@@ -12,10 +13,10 @@ class NetworkService:
     Attributes:
         configuration_strategy: An instance of a class that implements the configuration management logic for network settings.
     """
-    def __init__(self, configuration_strategy, application_config: Optional['AppConfig'] = None):
+    def __init__(self, configuration_strategy, user_settings: NetworkCenterSettings = None):
         self.configuration_strategy = configuration_strategy
-        self.app_config = application_config
-        self.network_config = self.app_config.get_network_config()
+        self.user_settings = user_settings
+        self.network_config = self.user_settings.get_network_configuration()
 
     def get_network_configuration(self) -> NetworkConfig:
         """
@@ -50,9 +51,8 @@ class NetworkService:
         try:
             self.configuration_strategy.apply_configuration(self.network_config)
 
-            if self.app_config:
-                self.app_config.set_network_config(self.network_config)
-                self.app_config.save()
+            if self.user_settings:
+                self.user_settings.set_network_configuration(self.network_config)
 
             return 0, "Network settings updated successfully!"
 
