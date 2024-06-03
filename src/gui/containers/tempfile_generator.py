@@ -11,7 +11,7 @@ from src.application_config.app_logger import app_logger
 from src.constants import Colors
 from src.application_config.icon_setup import IconManager
 from src.engine.file_center.file_center_settings import FileCenterSettings
-from src.gui.containers.widgets.single_column_item_manager import SingleColumnItemManager
+from src.gui.containers.frames.single_column_item_manager import SingleColumnItemManager
 from src.gui.containers.widgets.tooltip import add_tooltip
 
 

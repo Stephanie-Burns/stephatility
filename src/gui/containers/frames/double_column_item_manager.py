@@ -4,7 +4,7 @@ import tkinter.ttk as ttk
 from typing import List, Tuple
 
 from src.constants import Colors
-from src.gui.containers.widgets.base.base_item_manager import BaseItemManager
+from src.gui.containers.frames.base.base_item_manager import BaseItemManager
 
 
 class DoubleColumnItemManager(BaseItemManager):
@@ -12,11 +12,14 @@ class DoubleColumnItemManager(BaseItemManager):
         # Frame - Add Items
         self.add_frame = tk.Frame(self, bg=Colors.ORBITAL)
         self.add_frame.grid(row=0, column=0, sticky=tk.EW, pady=10, padx=10)
+        self.add_frame.grid_columnconfigure(1, weight=1)
         self.add_frame.grid_columnconfigure(3, weight=1)
 
         # Label - Column One
-        self.entry_label1 = ttk.Label(self.add_frame, text=f"Add {self.item_type} 1:", background=Colors.ORBITAL)
-        self.entry_label1.grid(row=0, column=0, padx=5)
+        self.entry_label1 = tk.Label(
+            self.add_frame, text=f"Add {self.column_names[0].lower()}:", background=Colors.ORBITAL, anchor=tk.W
+        )
+        self.entry_label1.grid(row=0, column=0, padx=5, sticky=tk.W)
 
         # Entry - Column One
         self.entry1 = tk.Entry(self.add_frame, relief=tk.SUNKEN)
@@ -26,8 +29,10 @@ class DoubleColumnItemManager(BaseItemManager):
         self.entry1.bind('<KeyRelease>', lambda event: self._update_add_button_state())
 
         # Label - Column Two
-        self.entry_label2 = ttk.Label(self.add_frame, text=f"Add {self.item_type} 2:", background=Colors.ORBITAL)
-        self.entry_label2.grid(row=1, column=0, padx=5)
+        self.entry_label2 = tk.Label(
+            self.add_frame, text=f"Add {self.column_names[1].lower()}:", background=Colors.ORBITAL, anchor=tk.W
+        )
+        self.entry_label2.grid(row=1, column=0, padx=5, sticky=tk.W)
 
         # Entry - Column Two
         self.entry2 = tk.Entry(self.add_frame, relief=tk.SUNKEN)

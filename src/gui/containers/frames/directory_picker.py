@@ -7,6 +7,8 @@ from src.gui.containers.widgets.blue_label import BlueLabel
 from src.gui.containers.widgets.blue_button import BlueButton
 
 
+
+# !!!!! Dep this when networck center directory pickeer is updated.
 class DirectoryPickerRow(tk.Frame):
     def __init__(self, parent: tk.Widget, directory_var: tk.StringVar, **kwargs) -> None:
         super().__init__(parent, **kwargs)

@@ -1,13 +1,8 @@
-import tkinter
-from dataclasses import dataclass
 from tkinter import messagebox, ttk
-from typing import Callable, Optional
 import tkinter as tk
 
-from src.gui.mixins import CallbackMixin
-from src.gui.containers.widgets.tooltip import add_tooltip
 from src.gui.containers.widgets.toggle_button import ToggleButton
-
+from src.gui.containers.frames.double_column_item_manager import DoubleColumnItemManager
 
 class ResetPasswordWidget(tk.Frame):
     FONT_FAMILY = 'Arial'
@@ -37,7 +32,9 @@ class ResetPasswordWidget(tk.Frame):
         self.change_pw_label.grid(row=1, column=0, pady=(0, 0), sticky=tk.SW)
 
         # Label - Validation Message
-        self.validation_message = tk.Label(self, text="", fg='grey', font=(self.FONT_FAMILY, 8, 'italic'))
+        self.validation_message = tk.Label(
+            self, text="", fg='grey', font=(self.FONT_FAMILY, 8, 'italic'), width=35, anchor=tk.W
+        )
         self.validation_message.grid(row=2, column=0, pady=(0, 0), sticky=tk.W)
 
         # Button - Show Password
@@ -67,6 +64,8 @@ class ResetPasswordWidget(tk.Frame):
         self.confirm_password = tk.Entry(self, show='*')
         self.confirm_password.bind('<KeyRelease>', self.validate_password)
         self.confirm_password.grid(row=2, column=3, padx=(0, 0), pady=6, sticky=tk.NW)
+
+        self.validate_password()
 
     def toggle_password(self):
         if self.show_password_button.config('text')[-1] == 'Show':
@@ -118,9 +117,17 @@ class DemoApp(tk.Tk):
         # Frame - Self
         self.title('Demo Application')
         self.grid_rowconfigure(0, weight=0)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=0)
+        self.grid_rowconfigure(1, weight=0)
+        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=1)
+        self.grid_rowconfigure(4, weight=0)
+        self.grid_rowconfigure(5, weight=0)
+        self.grid_rowconfigure(6, weight=0)
+        self.grid_rowconfigure(7, weight=0)
         self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=0)
+        self.grid_columnconfigure(2, weight=0)
+        self.grid_columnconfigure(3, weight=1)
 
         # Label - Title
         self.page_title = tk.Label(self, text='Secure Storage', font=('Arial', 20, 'bold'))
@@ -128,30 +135,38 @@ class DemoApp(tk.Tk):
 
         # Separator
         self.separator = ttk.Separator(self, orient=tk.HORIZONTAL)
-        self.separator.grid(row=1, column=0, columnspan=3, sticky=tk.EW, pady=10)
+        self.separator.grid(row=1, column=0, columnspan=5, sticky=tk.EW, pady=10)
 
         # # Label - Notes
         # self.notes = tk.Label(self, text='Notes', font=('Arial', 14, 'bold'))
         # self.notes.grid(row=2, column=0, sticky=tk.W, padx=0, pady=(0, 15))
 
-        self.scrollable_text_area = ScrollableTextArea(self)
-        self.scrollable_text_area.grid(row=3, column=0, columnspan=3, sticky='nsew', padx=(10, 10), pady=(10, 10))
+        # self.scrollable_text_area = ScrollableTextArea(self)
+        # self.scrollable_text_area.grid(row=3, column=2, columnspan=3, sticky='nsew', padx=(10, 10), pady=(10, 10))
+
+        config_double = [("Item1A", "Item1B"), ("Item2A", "Item2B"), ("Item3A", "Item3B")]
+        self.item_manager_early = DoubleColumnItemManager(
+            parent=self, items=config_double, item_type="Password", column_names=["Source", "Password"]
+        )
+        self.item_manager_early.grid(row=3, column=2, columnspan=3, sticky='nsew', padx=(10, 15), pady=(5, 10))
+
+
 
         # Separator
         self.separator = ttk.Separator(self, orient=tk.HORIZONTAL)
-        self.separator.grid(row=4, column=0, columnspan=3, sticky=tk.EW, pady=10)
+        self.separator.grid(row=4, column=1, columnspan=4, sticky=tk.EW, pady=10, padx=(5, 0))
 
         #
         self.reset_password_widget = ResetPasswordWidget(self)
-        self.reset_password_widget.grid(row=5, column=0, columnspan=3, padx=10, pady=10, sticky=tk.NSEW)
+        self.reset_password_widget.grid(row=5, column=2, columnspan=3, padx=(10, 15), pady=10, sticky=tk.NSEW)
 
         # Separator
         self.separator = ttk.Separator(self, orient=tk.HORIZONTAL)
-        self.separator.grid(row=6, column=0, columnspan=3, sticky=tk.EW, pady=10)
+        self.separator.grid(row=6, column=0, columnspan=5, sticky=tk.EW, pady=10)
 
         # Frame - Button Container
         self.b_frame = tk.Frame(self)
-        self.b_frame.grid(row=7, column=2, sticky=tk.NSEW)
+        self.b_frame.grid(row=7, column=4, sticky=tk.NSEW, padx=(0, 5), pady=(0, 0))
 
         # Button - Show State
         self.show_state_button = tk.Button(
@@ -170,6 +185,27 @@ class DemoApp(tk.Tk):
             command=self.perform_action_based_on_state
         )
         self.perform_action_button.grid(row=0, column=1, pady=(0, 10), padx=(0, 10), sticky=tk.EW)
+
+        # config_double = [("Item1A", "Item1B"), ("Item2A", "Item2B"), ("Item3A", "Item3B")]
+        # self.item_manager = DoubleColumnItemManager(
+        #     parent=self, items=config_double, item_type="Password", column_names=["Source", "Password"]
+        # )
+        # self.item_manager.grid(row=2, rowspan=4, column=0, padx=(10, 10), pady=(10, 10), sticky=tk.NSEW)
+        self.scrollable_text_area = ScrollableTextArea(self)
+        self.scrollable_text_area.grid(row=2, rowspan=4, column=0, padx=(15, 10), pady=(5, 10), sticky=tk.NSEW)
+
+
+
+        # Separator
+        self.vertical_separator = ttk.Separator(self, orient=tk.VERTICAL)
+        self.vertical_separator.grid(row=1, rowspan=6, column=1, sticky='ns', padx=(5, 5), pady=(10, 11))
+
+        # # Separator
+        # self.vertical_separator = ttk.Separator(self, orient=tk.VERTICAL)
+        # self.vertical_separator.grid(row=1, rowspan=6, column=5, sticky='ns', padx=(5, 5), pady=(15, 5))
+
+        configure_styles()
+        initialize_icons()
 
     def show_state(self):
         require_password = self.reset_password_widget.get_require_password()
@@ -199,5 +235,9 @@ class DemoApp(tk.Tk):
 
 if __name__ == '__main__':
     from src.gui.containers.widgets.scrollable_text_area import ScrollableTextArea
+    from src.application_config.icon_setup import initialize_icons
+    from src.gui.styles import configure_styles
+
+
     app = DemoApp()
     app.mainloop()

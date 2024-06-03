@@ -4,7 +4,7 @@ from tkinter import ttk, PhotoImage
 from typing import Callable, List, Optional, Tuple, Union
 
 from src.gui.containers.toplevel.base.top_level_base import ToplevelBase
-from src.gui.containers.widgets.double_column_item_manager import DoubleColumnItemManager
+from src.gui.containers.frames.double_column_item_manager import DoubleColumnItemManager
 
 
 class DoubleColumnItemManagerTopLevel(ToplevelBase):

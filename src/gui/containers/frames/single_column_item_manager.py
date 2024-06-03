@@ -4,7 +4,7 @@ from tkinter import messagebox, ttk
 from typing import List, Tuple
 
 from src.constants import Colors
-from src.gui.containers.widgets.base.base_item_manager import BaseItemManager
+from src.gui.containers.frames.base.base_item_manager import BaseItemManager
 from src.gui.containers.widgets.blue_button import BlueButton
 
 
