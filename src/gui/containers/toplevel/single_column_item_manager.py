@@ -33,7 +33,7 @@ class SingleColumnItemManager(BaseItemManager):
         self.add_button.config(state=tk.DISABLED)
 
     def _get_columns(self) -> List[Tuple[str, str]]:
-        return [(self.item_type.lower(), f"{self.item_type}s")]
+        return [(self.item_type.lower(), self.column_names[0])]
 
     def add_item_from_entry(self):
         # Add items to the treeview and clear the entry field

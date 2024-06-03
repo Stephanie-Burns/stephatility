@@ -1,3 +1,4 @@
+
 import tkinter as tk
 import tkinter.ttk as ttk
 
@@ -8,6 +9,7 @@ from src.engine.network_center import NetworkService
 from src.gui.containers.widgets.blue_label import BlueLabel
 from src.gui.containers.widgets.blue_button import BlueButton
 from src.constants import Colors
+
 
 class IPManager(tk.Frame):
     def __init__(
@@ -62,7 +64,6 @@ class IPManager(tk.Frame):
         self.manage_button.grid(row=0, column=3, padx=(0, 0), pady=0, sticky=tk.EW)
 
         self._check_apply_button_state()       # Initial check
-
 
     def _check_apply_button_state(self) -> None:
         if self.network_service.network_config.has_changed():

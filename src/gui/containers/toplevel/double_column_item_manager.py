@@ -49,8 +49,8 @@ class DoubleColumnItemManager(BaseItemManager):
 
     def _get_columns(self) -> List[Tuple[str, str]]:
         return [
-            (f"{self.item_type.lower()}1", f"{self.item_type} 1"),
-            (f"{self.item_type.lower()}2", f"{self.item_type} 2")
+            (f"{self.item_type.lower()}1", self.column_names[0]),
+            (f"{self.item_type.lower()}2", self.column_names[1])
         ]
 
     def add_item_from_entry(self):

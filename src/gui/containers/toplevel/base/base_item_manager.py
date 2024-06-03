@@ -10,43 +10,26 @@ from src.gui.icon_manager import IconManager
 from src.gui.mixins import CallbackMixin
 
 
-class BaseItemManager(CallbackMixin, tk.Toplevel):
+class BaseItemManager(tk.Frame):
     def __init__(
             self,
-            parent          : tk.Misc,
+            parent          : tk.Widget,
             uid             : int = 0,
             item_type       : str = "Item",
-            icon            : Optional[PhotoImage] = None,
             items           : List[str] | List[Tuple[str, ...]] = None,
+            column_names: Optional[List[str]] = None,
             update_callback : Optional[Callable[..., None]] = None,
             **kwargs
     ):
-        super().__init__(update_callback, parent, borderwidth=2, relief="raised", bg=Colors.ORBITAL, **kwargs)
+        super().__init__(parent, borderwidth=2, relief="raised", bg=Colors.ORBITAL, **kwargs)
         self.uid = uid
         self.item_type = item_type
-        self.icon = icon
         self.initial_items = items
-
-        self.title(f"{item_type} Manager")
-        self.geometry("400x500")
-        self.resizable(True, True)
-        self.attributes("-topmost", True)
-
-        self.icon_manager = IconManager()
-        if icon:
-            self.iconphoto(False, self.icon)
-        else:
-            self.iconphoto(False, self.icon_manager.get_icon('item', (16, 16)))
-
-        self.transient(parent)
-        self.grab_set()
-        self.focus_set()
+        self.column_names = column_names or [self.item_type]
 
         self._create_widgets()
         self.set_items(self.initial_items)
         self._update_buttons_state()
-
-        self.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def add_item_from_entry(self):
         raise NotImplementedError("Subclasses should implement this method.")
@@ -55,7 +38,7 @@ class BaseItemManager(CallbackMixin, tk.Toplevel):
         raise NotImplementedError("Subclasses should implement this method.")
 
     def _get_columns(self) -> List[Tuple[str, str]]:
-        raise NotImplementedError("Subclasses should implement this method.")
+        return [(name, name) for name in self.column_names]
 
     def _create_widgets(self):
         self.grid_columnconfigure(0, weight=1)
@@ -136,11 +119,6 @@ class BaseItemManager(CallbackMixin, tk.Toplevel):
             self.remove_all_button.config(state=tk.DISABLED)
             self.remove_button.config(state=tk.DISABLED)
 
-    def _on_close(self):
-        self.grab_release()
-        self.emit_update()
-        self.destroy()
-
     def remove_item(self):
         # Remove selected items from the treeview
         selected_item = self.tree.selection()
@@ -181,6 +159,96 @@ class BaseItemManager(CallbackMixin, tk.Toplevel):
         self._update_buttons_state()
 
 
+class ToplevelBase(CallbackMixin, tk.Toplevel):
+    def __init__(
+            self,
+            parent: Optional[tk.Misc] = None,
+            icon: Optional[PhotoImage] = None,
+            update_callback: Optional[Callable[..., None]] = None,
+            **kwargs
+    ):
+        super().__init__(update_callback, parent, **kwargs)
+        self.attributes("-topmost", True)
+        self.transient(parent)
+        self.grab_set()
+        self.focus_set()
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+        self.icon = icon
+        self.icon_manager = IconManager()
+
+        if self.icon:
+            self.iconphoto(False, self.icon)
+        else:
+            self.iconphoto(False, self.icon_manager.get_icon('item', (16, 16)))
+
+    def _on_close(self):
+        self.grab_release()
+        self.emit_update()
+        self.destroy()
+
+
+class SingleColumnItemManagerTopLevel(ToplevelBase):
+    def __init__(
+            self,
+            update_callback : Optional[Callable[..., None]] = None,
+            parent          : Optional[tk.Misc] = None,
+            icon            : Optional[PhotoImage] = None,
+            uid             : Optional[int] = 0,
+            item_type       : Optional[str] = 'Item',
+            items           : Optional[Union[List[str], List[Tuple[str, ...]]]] = None,
+            column_names    : Optional[List[str]] = None,
+            **kwargs
+    ):
+        super().__init__(update_callback=update_callback, parent=parent, icon=icon, **kwargs)
+        self.title(f"{item_type} Manager")
+        self.geometry("400x500")
+        self.resizable(True, True)
+
+        self.item_manager_frame = ttk.Frame(self)
+        self.item_manager_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.item_manager = SingleColumnItemManager(
+            parent=self.item_manager_frame,
+            uid=uid, items=items,
+            item_type=item_type,
+            column_names=column_names,
+            update_callback=update_callback
+        )
+        self.item_manager.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+
+class DoubleColumnItemManagerTopLevel(ToplevelBase):
+    def __init__(
+            self,
+            update_callback : Optional[Callable[..., None]] = None,
+            parent          : Optional[tk.Misc] = None,
+            icon            : Optional[PhotoImage] = None,
+            uid             : Optional[int] = 0,
+            item_type       : Optional[str] = 'Item',
+            items           : Optional[Union[List[str], List[Tuple[str, ...]]]] = None,
+            column_names    : Optional[List[str]] = None,
+            **kwargs
+    ):
+        super().__init__(update_callback=update_callback, parent=parent, icon=icon, **kwargs)
+        self.title(f"{item_type} Manager")
+        self.geometry("400x500")
+        self.resizable(True, True)
+
+        self.item_manager_frame = ttk.Frame(self)
+        self.item_manager_frame.pack(expand=True, fill=tk.BOTH)
+
+        self.item_manager = DoubleColumnItemManager(
+            parent=self.item_manager_frame,
+            uid=uid,
+            items=items,
+            item_type=item_type,
+            column_names=column_names,
+            update_callback=update_callback
+        )
+        self.item_manager.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+
 class _DemoApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -195,23 +263,33 @@ class _DemoApp(tk.Tk):
 
         config_single = [".txt", ".pdf", ".docx"]
 
-        self.open_single_button = ttk.Button(self, text="Open Single Column Manager", command=lambda: self.open_single_column_manager(config_single))
+        self.open_single_button = ttk.Button(
+            self, text="Open Single Column Manager", command=lambda: self.open_single_column_manager(config_single)
+        )
         self.open_single_button.pack(pady=10)
 
-        self.open_two_button = ttk.Button(self, text="Open Two Column Manager", command=lambda: self.open_two_column_manager(config_double))
+        self.open_two_button = ttk.Button(
+            self, text="Open Two Column Manager", command=lambda: self.open_two_column_manager(config_double)
+        )
         self.open_two_button.pack(pady=10)
 
     def open_single_column_manager(self, user_settings):
 
-        item_manager = SingleColumnItemManager(self, items=user_settings, item_type="Extension")
+        item_manager = SingleColumnItemManagerTopLevel(
+            parent=self, uid=0, items=user_settings, item_type="Item", column_names=["Extensions"]
+        )
 
         self.wait_window(item_manager)
 
     def open_two_column_manager(self, user_settings):
-        from src.gui.icon_manager import IconManager
+
         icon_manager = IconManager()
         icon = icon_manager.get_icon('vault', (16, 16))
-        item_manager = DoubleColumnItemManager(self, items=user_settings, item_type="Item", icon=icon)
+
+        # TODO column_names = ['Source', 'Password']
+        item_manager = DoubleColumnItemManagerTopLevel(
+            parent=self, items=user_settings, item_type="Password", icon=icon, column_names=["Source", "Password"]
+        )
 
         self.wait_window(item_manager)
 
