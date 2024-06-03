@@ -193,6 +193,13 @@ class DemoApp(tk.Tk):
         # self.item_manager.grid(row=2, rowspan=4, column=0, padx=(10, 10), pady=(10, 10), sticky=tk.NSEW)
         self.scrollable_text_area = ScrollableTextArea(self)
         self.scrollable_text_area.grid(row=2, rowspan=4, column=0, padx=(15, 10), pady=(5, 10), sticky=tk.NSEW)
+        self.scrollable_text_area.set_text(
+            "I've got a secret\n"
+           "It's on the tip of my tongue,\n"
+           "it's on the back of my lungs\n"
+           "And I'm gonna keep it\n"
+           "I know something you don't know…\n"
+        )
 
 
 
