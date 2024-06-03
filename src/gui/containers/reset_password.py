@@ -172,7 +172,7 @@ class DemoApp(tk.Tk):
         self.show_state_button = tk.Button(
             self.b_frame,
             text='Show State',
-            width=10,
+            width=15,
             command=self.show_state
         )
         self.show_state_button.grid(row=0, column=0, pady=(0, 10), padx=(0, 10), sticky=tk.EW)
@@ -181,7 +181,7 @@ class DemoApp(tk.Tk):
         self.perform_action_button = tk.Button(
             self.b_frame,
             text='Perform Action',
-            width=10,
+            width=15,
             command=self.perform_action_based_on_state
         )
         self.perform_action_button.grid(row=0, column=1, pady=(0, 10), padx=(0, 10), sticky=tk.EW)
@@ -221,10 +221,10 @@ class DemoApp(tk.Tk):
         password_valid = self.reset_password_widget.is_password_valid()
 
         state_message = (
-            f'Require Password: {'Yes' if require_password else 'No'}\n'
+            f'Require Password: {"Yes" if require_password else "No"}\n'
             f'New Password: {new_password}\n'
             f'Confirm Password: {confirm_password}\n'
-            f'Password Valid: {'Yes' if password_valid else 'No'}'
+            f'Password Valid: {"Yes" if password_valid else "No"}'
         )
         messagebox.showinfo('Current State', state_message)
 
