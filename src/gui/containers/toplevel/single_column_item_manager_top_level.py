@@ -10,8 +10,8 @@ from src.gui.containers.frames.single_column_item_manager import SingleColumnIte
 class SingleColumnItemManagerTopLevel(ToplevelBase):
     def __init__(
             self,
+            parent: Optional[tk.Misc] = None,
             update_callback : Optional[Callable[..., None]] = None,
-            parent          : Optional[tk.Misc] = None,
             icon            : Optional[PhotoImage] = None,
             uid             : Optional[int] = 0,
             item_type       : Optional[str] = 'Item',
@@ -32,6 +32,12 @@ class SingleColumnItemManagerTopLevel(ToplevelBase):
             items=items,
             item_type=item_type,
             column_names=column_names,
-            update_callback=update_callback
+            # update_callback=update_callback
         )
         self.item_manager.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    def get_items(self) -> List[Tuple[str, ...]]:
+        return self.item_manager.get_items()
+
+    def set_items(self, items: Union[List[str], List[Tuple[str, ...]]]):
+        self.item_manager.set_items(items)

@@ -7,12 +7,13 @@ from src.constants import Colors
 from src.gui.containers.widgets.draggable_treeview import DraggableTreeview
 from src.gui.containers.widgets.blue_button import BlueButton
 from src.gui.icon_manager import IconManager
+from src.gui.mixins import CallbackMixin
 
 
-class BaseItemManager(tk.Frame):
+class BaseItemManager(CallbackMixin, tk.Frame):
     def __init__(
             self,
-            parent          : tk.Widget,
+            parent          : tk.Frame,
             uid             : int = 0,
             item_type       : str = "Item",
             items           : List[str] | List[Tuple[str, ...]] = None,
@@ -20,7 +21,8 @@ class BaseItemManager(tk.Frame):
             update_callback : Optional[Callable[..., None]] = None,
             **kwargs
     ):
-        super().__init__(parent, borderwidth=2, relief="raised", bg=Colors.ORBITAL, **kwargs)
+        super().__init__(update_callback=update_callback, master=parent, borderwidth=2, relief="raised", bg=Colors.ORBITAL, **kwargs)
+        self.update_callback = update_callback
         self.uid = uid
         self.item_type = item_type
         self.initial_items = items

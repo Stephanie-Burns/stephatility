@@ -130,8 +130,8 @@ class DemoApp(tk.Tk):
         self.grid_columnconfigure(3, weight=1)
 
         # Label - Title
-        self.page_title = tk.Label(self, text='Secure Storage', font=('Arial', 20, 'bold'))
-        self.page_title.grid(row=0, column=0, sticky=tk.W, padx=0, pady=(0, 15))
+        self.page_title = tk.Label(self, text='itneverends'*9, font=('Arial', 20, 'bold'))
+        self.page_title.grid(row=0, column=0, columnspan=5, sticky=tk.W, padx=0, pady=(0, 15))
 
         # Separator
         self.separator = ttk.Separator(self, orient=tk.HORIZONTAL)

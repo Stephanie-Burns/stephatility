@@ -12,6 +12,7 @@ from src.constants import Colors
 from src.application_config.icon_setup import IconManager
 from src.engine.file_center.file_center_settings import FileCenterSettings
 from src.gui.containers.frames.single_column_item_manager import SingleColumnItemManager
+from src.gui.containers.toplevel.single_column_item_manager_top_level import SingleColumnItemManagerTopLevel
 from src.gui.containers.widgets.tooltip import add_tooltip
 
 
@@ -73,7 +74,7 @@ class TempFileGenerator(tk.Frame):
 
     def _on_manage_clicked(self):
         if self._extension_manager is None or not tk.Toplevel.winfo_exists(self._extension_manager):
-            self._extension_manager = SingleColumnItemManager(
+            self._extension_manager = SingleColumnItemManagerTopLevel(
                 self,
                 item_type="Extension",
                 icon=self.icon_manager.get_icon('browse_folder', (16, 16)),

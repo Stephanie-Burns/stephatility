@@ -15,7 +15,8 @@ class ToplevelBase(CallbackMixin, tk.Toplevel):
             update_callback: Optional[Callable[..., None]] = None,
             **kwargs
     ):
-        super().__init__(update_callback, parent, **kwargs)
+        super().__init__(parent, **kwargs)
+        self.update_callback = update_callback
         self.attributes("-topmost", True)
         self.transient(parent)
         self.grab_set()
