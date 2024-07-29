@@ -9,8 +9,8 @@ ASSETS_DIR          = PROJECT_ROOT / 'assets' / 'icons'
 LOGS_DIR            = PROJECT_ROOT / 'logs' / 'app.log'
 USER_SETTINGS_JSON  = PROJECT_ROOT / 'user' / 'user_settings.json'
 USER_SETTINGS_TOML  = PROJECT_ROOT / 'user' / 'user_settings.toml'  # TODO Deprecate
-QUICK_WINIP_BAT     = PROJECT_ROOT / 'src' / 'engine' / 'network_tools' / 'quick_winip.bat'
-MODIFY_HOSTS_BAT    = PROJECT_ROOT / 'src' / 'engine' / 'network_tools' / 'http_server' / 'modify_hosts.bat'
+QUICK_WINIP_BAT     = PROJECT_ROOT / 'src' / 'engine' / 'network_center' / 'quick_winip.bat'
+MODIFY_HOSTS_BAT    = PROJECT_ROOT / 'src' / 'engine' / 'network_center' / 'http_server' / 'modify_hosts.bat'
 
 
 class Colors:

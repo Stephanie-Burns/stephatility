@@ -27,12 +27,11 @@ class IPV4AddressConfiguration:
         Raises:
             subprocess.CalledProcessError: If the command fails.
         """
-        bat_file_path = QUICK_WINIP_BAT
         args = f'"{config.adapter_name}", "{config.ipv4_address}", "{config.subnet_mask}"'
         if config.default_gateway != "0.0.0.0":
             args += f', "{config.default_gateway}"'
 
-        ps_command = f'Powershell -Command "Start-Process \'{bat_file_path}\' -ArgumentList {args} -Verb RunAs"'
+        ps_command = f'Powershell -Command "Start-Process \'{QUICK_WINIP_BAT}\' -ArgumentList {args} -Verb RunAs"'
         subprocess.check_output(ps_command, shell=True)
 
     @classmethod
